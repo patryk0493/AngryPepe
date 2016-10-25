@@ -6,6 +6,11 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -16,7 +21,13 @@ public class AngryPepeMain extends ApplicationAdapter {
 	Texture img;
 
 	private PerspectiveCamera perspectiveCamera;
+	public Environment environment;
+
 	private Texture texture;
+
+	public ModelBatch modelBatch;
+	public Model model;
+	public ModelInstance instance;
 
 	boolean isGameView = false;
 
@@ -35,44 +46,71 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		initaliseInputProcessors();
 		batch = new SpriteBatch();
+		modelBatch = new ModelBatch();
 
 
 		perspectiveCamera = new PerspectiveCamera(90, w, h);
 		perspectiveCamera.near = 0.1f;
-		perspectiveCamera.far = 1000f;
-		perspectiveCamera.translate(0, 0, 0);
+		perspectiveCamera.far = 500f;
 		perspectiveCamera.position.set(w/2, h/2, 300);
+		perspectiveCamera.update();
 
 		texture = new Texture(Gdx.files.internal("scene.jpg"));
 		texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
+		ModelBuilder modelBuilder = new ModelBuilder();
+		model = modelBuilder.createBox(50f, 50f, 50f,
+				new Material(ColorAttribute.createDiffuse(Color.WHITE)),
+				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
+		instance = new ModelInstance(model);
+		instance.transform.translate(600f, 200f, 0);
+
 		batch = new SpriteBatch();
 		img = new Texture(Gdx.files.internal("badlogic.jpg"));
+
+		prepareEnviroment();
 	}
 
 	@Override
 	public void render() {
+		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		perspectiveCamera.fieldOfView = 60 + (int)(zoom*50);
 		perspectiveCamera.update();
+		batch.setProjectionMatrix(perspectiveCamera.combined);
 
 		batch.begin();
-
-		batch.setProjectionMatrix(perspectiveCamera.combined);
 
 		// TODO enviroment
 		batch.draw(texture, 0, 0);
 		batch.draw(img, parallaxDelta, parallaxDelta);
 
 		batch.end();
+
+		modelBatch.begin(perspectiveCamera);
+
+		instance.transform.rotate(new Vector3(1, 1, 1f), 1f);
+		modelBatch.render(instance);
+
+		modelBatch.end();
 	}
 	
 	@Override
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
+	}
+
+	public void prepareEnviroment() {
+		//COŚ NIE BANGLA
+		environment = new Environment();
+		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f,
+				0.8f, 0.8f, 1.0f));
+		environment.add(new DirectionalLight()
+				.set(1f, 0f, 0f, 1f, 0f, -1f));
+
 	}
 
 	public void initaliseInputProcessors() {
@@ -117,19 +155,16 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		@Override
 		public boolean keyDown(int keycode) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean keyUp(int keycode) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean keyTyped(char character) {
-			// TODO Auto-generated method stub
 
 			return false;
 		}
@@ -143,13 +178,11 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		@Override
 		public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean mouseMoved(int screenX, int screenY) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
@@ -185,19 +218,17 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		@Override
 		public boolean longPress(float x, float y) {
-			// TODO Auto-generated method stub
+
 			return false;
 		}
 
 		@Override
 		public boolean fling(float velocityX, float velocityY, int button) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean pan(float x, float y, float deltaX, float deltaY) {
-			// TODO Auto-generated method stub
 			Vector3 transVec = new Vector3(-deltaX * zoom, deltaY * zoom, 0);
 			perspectiveCamera.translate(transVec);
 
@@ -206,14 +237,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		@Override
 		public boolean panStop(float x, float y, int pointer, int button) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2,
 							 Vector2 pointer1, Vector2 pointer2) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
@@ -226,19 +255,19 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
+
 
 	}
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
+
 
 	}
 
 	@Override
 	public void resume() {
-		// TODO Auto-generated method stub
+
 
 	}
 
