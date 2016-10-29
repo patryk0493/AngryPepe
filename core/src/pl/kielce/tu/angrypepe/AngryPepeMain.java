@@ -1,9 +1,6 @@
 package pl.kielce.tu.angrypepe;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
@@ -15,6 +12,7 @@ import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.*;
 
 public class AngryPepeMain extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -30,6 +28,11 @@ public class AngryPepeMain extends ApplicationAdapter {
 	public ModelInstance instance;
 
 	boolean isGameView = false;
+
+	private Box2DDebugRenderer b2dr;
+	private World world;
+	private Body player;
+	public final int PPM = 32;
 
 	private InputMultiplexer inputMultiplexer;
 	private MyInputProcessor inputProcessor;
@@ -52,21 +55,27 @@ public class AngryPepeMain extends ApplicationAdapter {
 		perspectiveCamera = new PerspectiveCamera(90, w, h);
 		perspectiveCamera.near = 0.1f;
 		perspectiveCamera.far = 500f;
-		perspectiveCamera.position.set(w/2, h/2, 300);
+		perspectiveCamera.position.set(w/2, h/2, 420);
 		perspectiveCamera.update();
 
 		texture = new Texture(Gdx.files.internal("scene.jpg"));
 		texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
 		ModelBuilder modelBuilder = new ModelBuilder();
-		model = modelBuilder.createBox(50f, 50f, 50f,
-				new Material(ColorAttribute.createDiffuse(Color.WHITE)),
+		model = modelBuilder.createBox(100f, 100f, 100f,
+				new Material(ColorAttribute.createDiffuse(Color.RED)),
 				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 		instance = new ModelInstance(model);
 		instance.transform.translate(600f, 200f, 0);
 
 		batch = new SpriteBatch();
 		img = new Texture(Gdx.files.internal("badlogic.jpg"));
+
+		world = new World(new Vector2(0, -9.8f), false);
+		b2dr = new Box2DDebugRenderer();
+
+		player = createBox(-180, 300, 132, 132, false);
+		createBox(0, -300, 264, 232, true);
 
 		prepareEnviroment();
 	}
@@ -77,39 +86,72 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+		b2dr.render(world, perspectiveCamera.combined.scl(PPM));
+
 		perspectiveCamera.fieldOfView = 60 + (int)(zoom*50);
 		perspectiveCamera.update();
 		batch.setProjectionMatrix(perspectiveCamera.combined);
 
 		batch.begin();
+		world.step(1 / 60f, 6, 2);
 
 		// TODO enviroment
 		batch.draw(texture, 0, 0);
 		batch.draw(img, parallaxDelta, parallaxDelta);
 
 		batch.end();
-
 		modelBatch.begin(perspectiveCamera);
 
-		instance.transform.rotate(new Vector3(1, 1, 1f), 1f);
-		modelBatch.render(instance);
+		instance.transform.rotate(new Vector3(1f, 1f, 1f), 1f);
+		modelBatch.render(instance, environment);
 
 		modelBatch.end();
 	}
+
+	public Body createBox(int x, int y, int width, int height, boolean isStatic) {
+		Body pBody;
+		BodyDef def = new BodyDef();
+		FixtureDef fixture;
+
+		if(isStatic)
+			def.type = BodyDef.BodyType.StaticBody;
+		else
+			def.type = BodyDef.BodyType.DynamicBody;
+
+
+		def.position.set(x / PPM, y / PPM);
+		def.fixedRotation = false;
+		pBody = world.createBody(def);
+
+		PolygonShape shape = new PolygonShape();
+		shape.setAsBox(width / 2 / PPM, height / 2 / PPM);
+
+		fixture = new FixtureDef();
+		fixture.friction = 0.1f;
+		fixture.density = 1;
+		fixture.shape = shape;
+		pBody.setTransform(0, 0, 170);
+
+		pBody.createFixture(fixture);
+
+		shape.dispose();
+		return pBody;
+	}
+
 	
 	@Override
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
+		world.dispose();
+		b2dr.dispose();
 	}
 
 	public void prepareEnviroment() {
-		//COŚ NIE BANGLA
+
 		environment = new Environment();
-		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f,
-				0.8f, 0.8f, 1.0f));
-		environment.add(new DirectionalLight()
-				.set(1f, 0f, 0f, 1f, 0f, -1f));
+		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
+		environment.add(new DirectionalLight().set(Color.WHITE, new Vector3(1f, 0 , 0)));
 
 	}
 
@@ -196,7 +238,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		public boolean touchDown(float x, float y, int pointer, int button) {
 
 			initialScale = zoom;
-
+			player.applyForceToCenter(300f, 300.5f, false);
 			return false;
 		}
 
@@ -213,6 +255,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		@Override
 		public boolean tap(float x, float y, int count, int button) {
 			// TODO Auto-generated method stub
+
 			return false;
 		}
 
