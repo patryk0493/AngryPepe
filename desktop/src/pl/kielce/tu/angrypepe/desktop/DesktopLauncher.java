@@ -14,6 +14,7 @@ public class DesktopLauncher {
 		config.resizable=true;
 		config.vSyncEnabled = true;
 		config.foregroundFPS = 60;
+		config.samples = 4;
 		new LwjglApplication(new AngryPepeMain(), config);
 	}
 }
