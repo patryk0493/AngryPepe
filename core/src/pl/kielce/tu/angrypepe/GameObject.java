@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
-import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
-import com.badlogic.gdx.physics.bullet.collision.btShapeHull;
+import com.badlogic.gdx.physics.bullet.collision.*;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
 import com.badlogic.gdx.utils.Disposable;
@@ -22,14 +20,21 @@ public class GameObject {
     public String node;
     public ModelInstance instance;
     public btDefaultMotionState motionState = null;
+    protected float scaleRatio;
 
 
     public GameObject(Model model, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo,
-                      Vector3 position, boolean createMotionState) {
+                      Vector3 position, float scaleRatio, boolean createMotionState) {
         this.model = model;
         this.node = node;
+        this.scaleRatio = scaleRatio;
         body = new btRigidBody(constructionInfo);
         instance = new ModelInstance(model);
+
+        //instance.transform.scale(scaleRatio, scaleRatio, scaleRatio);
+        //instance.transform.rotate(new Vector3(0, 1, 0), 90);
+        //instance.calculateTransforms();
+
         instance.transform.trn(position);
         if (createMotionState) {
             motionState = new btDefaultMotionState(instance.transform);
@@ -55,10 +60,15 @@ public class GameObject {
         return instance;
     }
 
+    public void getWorldTransform() {
+        if (this.motionState != null)
+            this.motionState.getWorldTransform(this.getInstance().transform);
+    }
 
     static class BodyConstructor implements Disposable {
         public final Model model;
         public final String node;
+        private final float scaleRatio;
         public btCollisionShape shape;
         public Vector3 position = Vector3.Zero;
         public boolean motionStateCreate;
@@ -66,16 +76,21 @@ public class GameObject {
         private static Vector3 localInertia = new Vector3();
 
         public BodyConstructor(Model model, String node, btCollisionShape shape, Vector3 pos, float mass,
-                               boolean motionStateCreate) {
+                               float scaleRatio, boolean motionStateCreate) {
             this.model = model;
             this.node = node;
             this.shape = shape;
+            this.scaleRatio = scaleRatio;
             this.position = pos;
             this.motionStateCreate = motionStateCreate;
             if (this.shape == null) {
                 this.shape = createConvexHullShape(this.model, true);
             }
             this.shape.setMargin(0);
+            //this.shape.setLocalScaling(new Vector3(scaleRatio, scaleRatio, scaleRatio));
+            //TODO FIX SCALING
+            this.shape = new btUniformScalingShape((btConvexShape) this.shape, scaleRatio);
+
             if (mass > 0f)
                 this.shape.calculateLocalInertia(mass, localInertia);
             else
@@ -97,7 +112,7 @@ public class GameObject {
 
 
         public GameObject construct () {
-            return new GameObject(model, node, constructionInfo, position, motionStateCreate);
+            return new GameObject(model, node, constructionInfo, position, scaleRatio, motionStateCreate);
         }
 
         @Override
