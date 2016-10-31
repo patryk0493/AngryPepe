@@ -19,6 +19,8 @@ import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
+import com.badlogic.gdx.physics.bullet.softbody.btSoftBody;
+import com.badlogic.gdx.physics.bullet.softbody.btSoftBodyCollisionShape;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private ModelInstance groundInstance;
 	private ModelInstance boxInstance;
 	private ModelInstance skyInstance;
+	private GameObject sampleGameObject;
 	Array<Model> models;
 
 	boolean isGameView = false;
@@ -50,6 +53,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 	public float w, h;
 	public float zoom = 1.0f;
 	public float parallaxDelta = 0.5f;
+	public float objectScale = 2f;
 	private AssetManager assets;
 	private ArrayList<ModelInstance> objectInstances;
 
@@ -74,10 +78,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		modelBatch = new ModelBatch();
 
-		perspectiveCamera = new PerspectiveCamera(67, w, h);
+		perspectiveCamera = new PerspectiveCamera(100, w, h);
 		perspectiveCamera.near = 0.1f;
 		perspectiveCamera.far = 500f;
-		perspectiveCamera.position.set(0, 0, 150);
+		perspectiveCamera.position.set(0, 0, 20);
 		perspectiveCamera.update();
 
 		texture = new Texture(Gdx.files.internal("scene.jpg"));
@@ -90,15 +94,15 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		Model skyModel = null;
 		// MODELS
-		Model groundModel = modelBuilder.createBox(50f, 5f, 50f,
+		Model groundModel = modelBuilder.createBox(30f, 2.5f, 30f,
 				new Material(ColorAttribute.createDiffuse(Color.YELLOW)),
 				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 
-		Model boxModel = modelBuilder.createBox(20f, 20f, 20f,
+		Model boxModel = modelBuilder.createBox(2f, 2f, 2f,
 				new Material(ColorAttribute.createDiffuse(Color.RED)),
 				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 
-		Model sphereModel = modelBuilder.createSphere(20, 20, 20, 20, 20,
+		Model sphereModel = modelBuilder.createSphere(2, 2, 2, 20, 20,
 				new Material(ColorAttribute.createDiffuse(Color.WHITE), ColorAttribute.createSpecular(Color.GRAY),
 						FloatAttribute.createShininess(64f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 
@@ -129,11 +133,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 		headInstance = new ModelInstance(headModel);
 		boxInstance = new ModelInstance(boxModel);
 
-		sphereInstance.transform.trn(new Vector3(0, 20f, 0));
-		headInstance.transform.scale(10f, 10f, 10f);
-		headInstance.transform.trn(100f, 0f, 0f);
-		boxInstance.transform.trn(200f, 50f, 0f);
-		skyInstance.transform.scale(5f, 5f, 5f);
+		sphereInstance.transform.trn(new Vector3(0, 2f, 0));
+		headInstance.transform.scale(1f, 1f, 1f);
+		headInstance.transform.trn(10f, 5f, 0f);
+		boxInstance.transform.trn(20f, 5f, 0f);
+		skyInstance.transform.scale(.3f, .3f, .3f);
+		skyInstance.materials.set(0, new Material(ColorAttribute.createDiffuse(Color.ORANGE)));
 		//skyInstance.transform.scl(100f, 100f, 100f);
 
 		objectInstances.add(skyInstance);
@@ -151,16 +156,18 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Bullet.init();
 
 		//setting up the world
-		setupWorld(new Vector3(0, -9.81f, 1f));
+		setupWorld(new Vector3(0, -9.81f, 0));
 
 		// creating ground body
-		btCollisionShape groundshape = new btBoxShape(new Vector3(100f, 25f, 100f));
+		btCollisionShape groundshape = new btBoxShape(new Vector3(30f/ objectScale, 2.5f/ objectScale, 30f/ objectScale));
+				groundshape.setMargin(0);
 		shapes.add(groundshape);
 		btRigidBody.btRigidBodyConstructionInfo bodyInfo = new btRigidBody.btRigidBodyConstructionInfo(
-				0, null, groundshape, Vector3.Zero);
+				0f, null, groundshape, Vector3.Zero);
 		this.bodyInfos.add(bodyInfo);
 		btRigidBody body = new btRigidBody(bodyInfo);
-		body.setRestitution(1.0f);
+		body.setRestitution(.5f);
+
 		bodies.add(body);
 		world.addRigidBody(body);
 
@@ -170,25 +177,28 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		final btCollisionShape sphereShape = new btSphereShape(1f);
 		shapes.add(sphereShape);
-		bodyInfo = new btRigidBody.btRigidBodyConstructionInfo(1, sphereMotionState, sphereShape, new Vector3(1, 1, 1));
+		bodyInfo = new btRigidBody.btRigidBodyConstructionInfo(1f, sphereMotionState, sphereShape, new Vector3(1, 1, 1));
 		this.bodyInfos.add(bodyInfo);
 		body = new btRigidBody(bodyInfo);
 		body.setRestitution(1.0f);
+
+		//body.setAngularVelocity(new Vector3(0, 200f, 0));
 		bodies.add(body);
 		world.addRigidBody(body);
 
-		GameObject sampleGameObject = new GameObject.BodyConstructor(
-				modelBuilder.createBox(25f, 25f, 25f,
-						new Material(ColorAttribute.createDiffuse(Color.BLUE)),
-						VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal),
+		sampleGameObject = new GameObject.BodyConstructor(
+				modelBuilder.createSphere(1, 1, 1, 20, 20,
+						new Material(ColorAttribute.createDiffuse(Color.FIREBRICK), ColorAttribute.createSpecular(Color.GRAY),
+								FloatAttribute.createShininess(64f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal),
 				"sample",
-				new btBoxShape(new Vector3(25f, 25f, 25f)),
-				new Vector3(20f, 40f, 0),
-				200f).construct();
-		btRigidBody sampleBody = sampleGameObject.getBody();
-		objectInstances.add(sampleGameObject.getInstance());
+				new btSphereShape(1 / objectScale),
+				new Vector3(0f, 5f, 0f),
+				2f, true)
+				.construct();
+		sampleGameObject.body.setRestitution(1.0f);
 
-		world.addRigidBody(sampleBody);
+		objectInstances.add(sampleGameObject.getInstance());
+		world.addRigidBody(sampleGameObject.getBody());
 	}
 
 	@Override
@@ -198,6 +208,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		perspectiveCamera.fieldOfView = 60 + (int)(zoom*50);
+		//perspectiveCamera.lookAt(sampleGameObject.instance.transform.getTranslation(new Vector3().Zero));
 		perspectiveCamera.update();
 		batch.setProjectionMatrix(perspectiveCamera.combined);
 
@@ -208,7 +219,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 		batch.end();
 
 		world.stepSimulation(Gdx.graphics.getDeltaTime(), 5);
+
 		sphereMotionState.getWorldTransform(sphereInstance.transform);
+		if (sampleGameObject.motionState != null)
+			sampleGameObject.motionState.getWorldTransform(sampleGameObject.getInstance().transform);
+		System.out.println(sampleGameObject.body.getLinearVelocity());
+
 		// 3D
 		modelBatch.begin(perspectiveCamera);
 		headInstance.transform.rotate(new Vector3(1f, 1f, 0f), 1f);
@@ -284,12 +300,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 			//Zoom out
 			if (amount > 0 && zoom < 1) {
-				zoom += 0.05f;
+				zoom += 0.02f;
 			}
 
 			//Zoom in
 			if (amount < 0 && zoom > 0.1) {
-				zoom -= 0.05f;
+				zoom -= 0.02f;
 			}
 
 			return true;
@@ -314,9 +330,19 @@ public class AngryPepeMain extends ApplicationAdapter {
 		@Override
 		public boolean keyTyped(char character) {
 
-			if (character == 'q') {
+			final float power = 3;
 
-			}
+			if(Gdx.input.isKeyPressed(Input.Keys.SPACE))
+				sampleGameObject.body.applyImpulse(new Vector3(0, power*3, 0), new Vector3().Zero);
+			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_LEFT))
+				sampleGameObject.body.applyImpulse(new Vector3(-power, 0, 0), new Vector3().Zero);
+			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_RIGHT))
+				sampleGameObject.body.applyImpulse(new Vector3(power, 0, 0), new Vector3().Zero);
+			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_UP))
+				sampleGameObject.body.applyImpulse(new Vector3(0, 0, -power), new Vector3().Zero);
+			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_DOWN))
+				sampleGameObject.body.applyImpulse(new Vector3(0, 0, power), new Vector3().Zero);
+
 			return false;
 		}
 
@@ -380,7 +406,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		@Override
 		public boolean pan(float x, float y, float deltaX, float deltaY) {
-			Vector3 transVec = new Vector3(-deltaX * zoom, deltaY * zoom, 0);
+
+			final float scalar = 0.2f;
+			Vector3 transVec = new Vector3(-deltaX * zoom * scalar, deltaY * zoom * scalar, 0);
 			perspectiveCamera.translate(transVec);
 
 			return false;
@@ -406,13 +434,11 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	@Override
 	public void resize(int width, int height) {
-
 		w = width;
 		h = height;
 		perspectiveCamera.viewportWidth = width;
 		perspectiveCamera.viewportHeight = height;
 		perspectiveCamera.update(true);
-
 	}
 
 	@Override
