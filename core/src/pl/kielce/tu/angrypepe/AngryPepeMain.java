@@ -19,8 +19,6 @@ import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
-import com.badlogic.gdx.physics.bullet.softbody.btSoftBody;
-import com.badlogic.gdx.physics.bullet.softbody.btSoftBodyCollisionShape;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
@@ -109,11 +107,11 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Model headModel = null;
 		try {
 			assets = new AssetManager();
-			assets.load("test.g3dj", Model.class);
+			assets.load("skyland.g3dj", Model.class);
 			assets.load("sky.g3dj", Model.class);
 			assets.finishLoading();
 			assets.update();
-			headModel = assets.get("test.g3dj", Model.class);
+			headModel = assets.get("skyland.g3dj", Model.class);
 			skyModel = assets.get("sky.g3dj", Model.class);
 		} catch (Exception e) {
 			e.printStackTrace();
