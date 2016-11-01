@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.*;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
@@ -21,7 +22,12 @@ public class GameObject {
     public ModelInstance instance;
     public btDefaultMotionState motionState = null;
     protected float scaleRatio;
+    public float healthPoints = 100;
 
+    private final static BoundingBox bounds = new BoundingBox();
+    public final Vector3 center = new Vector3();
+    public final Vector3 dimensions = new Vector3();
+    public float radius = 0;
 
     public GameObject(Model model, ModelInstance instance, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo,
                        float scaleRatio, boolean createMotionState) {
@@ -30,6 +36,7 @@ public class GameObject {
         this.scaleRatio = scaleRatio;
         this.instance = instance;
         body = new btRigidBody(constructionInfo);
+        body.setActivationState(Collision.DISABLE_DEACTIVATION); // Naprawia poruszanie obiektu,gdy wektor ruchuchu = 0
 
         if (createMotionState) {
             motionState = new btDefaultMotionState(this.instance.transform);
@@ -37,6 +44,11 @@ public class GameObject {
             body.setMotionState(motionState);
         } else
             body.setWorldTransform(this.instance.transform);
+
+        instance.calculateBoundingBox(bounds);
+        bounds.getCenter(center);
+        bounds.getDimensions(dimensions);
+        this.radius = dimensions.len() / 2f;
     }
 
     public btRigidBody getBody() {
@@ -58,6 +70,17 @@ public class GameObject {
     public void getWorldTransform() {
         if (this.motionState != null)
             this.motionState.getWorldTransform(this.getInstance().transform);
+    }
+
+    public float getKinematicEnergy() {
+
+        // TODO obliczenie energii kinetycznej dla wektora ruchu
+        return 1f;
+    }
+
+    public void destroy() {
+        body.dispose();
+        instance.model.dispose();
     }
 
     static class BodyConstructor implements Disposable {
