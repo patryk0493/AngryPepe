@@ -177,7 +177,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 				"box",
 				new btBoxShape(new Vector3(1, 1, 1)),
 				new Vector3(3f, 1f, 0f),
-				1f, 1, true)
+				1f, 1f, true)
 				.construct();
 		boxGameObject.body.setRestitution(.5f);
 		objectInstances.add(boxGameObject.getInstance());
@@ -199,7 +199,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 				"pepexD",
 				null,
 				new Vector3(0f, 6f, 0f),
-				2f, 2f, true)
+				2f, 1f, true)
 				.construct();
 		playerGameObject.body.setRestitution(.5f);
 

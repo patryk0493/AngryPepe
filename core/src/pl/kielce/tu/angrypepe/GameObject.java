@@ -23,25 +23,20 @@ public class GameObject {
     protected float scaleRatio;
 
 
-    public GameObject(Model model, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo,
-                      Vector3 position, float scaleRatio, boolean createMotionState) {
+    public GameObject(Model model, ModelInstance instance, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo,
+                       float scaleRatio, boolean createMotionState) {
         this.model = model;
         this.node = node;
         this.scaleRatio = scaleRatio;
+        this.instance = instance;
         body = new btRigidBody(constructionInfo);
-        instance = new ModelInstance(model);
 
-        //instance.transform.scale(scaleRatio, scaleRatio, scaleRatio);
-        //instance.transform.rotate(new Vector3(0, 1, 0), 90);
-        //instance.calculateTransforms();
-
-        instance.transform.trn(position);
         if (createMotionState) {
-            motionState = new btDefaultMotionState(instance.transform);
-            motionState.setWorldTransform(instance.transform);
+            motionState = new btDefaultMotionState(this.instance.transform);
+            motionState.setWorldTransform(this.instance.transform);
             body.setMotionState(motionState);
         } else
-            body.setWorldTransform(instance.transform);
+            body.setWorldTransform(this.instance.transform);
     }
 
     public btRigidBody getBody() {
@@ -72,6 +67,7 @@ public class GameObject {
         public btCollisionShape shape;
         public Vector3 position = Vector3.Zero;
         public boolean motionStateCreate;
+        public ModelInstance instance;
         public final btRigidBody.btRigidBodyConstructionInfo constructionInfo;
         private static Vector3 localInertia = new Vector3();
 
@@ -83,6 +79,13 @@ public class GameObject {
             this.scaleRatio = scaleRatio;
             this.position = pos;
             this.motionStateCreate = motionStateCreate;
+
+            // INSTANCE
+            this.instance = new ModelInstance(model);
+            instance.transform.trn(position);
+            this.instance.transform.scl(scaleRatio, scaleRatio,scaleRatio);
+
+            // SHAPE
             if (this.shape == null) {
                 this.shape = createConvexHullShape(this.model, true);
             }
@@ -91,6 +94,7 @@ public class GameObject {
             //TODO FIX SCALING
             this.shape = new btUniformScalingShape((btConvexShape) this.shape, scaleRatio);
 
+            // INERTIA
             if (mass > 0f)
                 this.shape.calculateLocalInertia(mass, localInertia);
             else
@@ -112,7 +116,7 @@ public class GameObject {
 
 
         public GameObject construct () {
-            return new GameObject(model, node, constructionInfo, position, scaleRatio, motionStateCreate);
+            return new GameObject(model, instance, node, constructionInfo, scaleRatio, motionStateCreate);
         }
 
         @Override
