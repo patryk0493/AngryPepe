@@ -82,8 +82,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		perspectiveCamera = new PerspectiveCamera(100, w, h);
 		perspectiveCamera.near = 0.1f;
 		perspectiveCamera.far = 500f;
-		perspectiveCamera.position.set(0, 10, 25);
-		perspectiveCamera.update();
+		setSideView();
 
 		texture = new Texture(Gdx.files.internal("sky.jpg"));
 		texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -332,6 +331,18 @@ public class AngryPepeMain extends ApplicationAdapter {
 		inputMultiplexer.addProcessor(inputProcessor);
 	}
 
+	public void setTopCameraView() {
+		perspectiveCamera.position.set(0, 20, 0);
+		perspectiveCamera.lookAt(new Vector3().Zero);
+		perspectiveCamera.update();
+	}
+
+	public void setSideView() {
+		perspectiveCamera.position.set(0, 10, 25);
+		perspectiveCamera.lookAt(new Vector3().Zero);
+		perspectiveCamera.update();
+	}
+
 	class MyInputProcessor implements InputProcessor {
 
 		private float startX, startY;
@@ -384,6 +395,14 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 			if(Gdx.input.isKeyPressed(Input.Keys.A))
 				createRandomGameObject();
+
+			if(Gdx.input.isKeyPressed(Input.Keys.P)) {
+				setTopCameraView();
+			}
+			if(Gdx.input.isKeyPressed(Input.Keys.O)) {
+				setSideView();
+			}
+
 
 			if(Gdx.input.isKeyPressed(Input.Keys.D)) { //REMOVE GAME OBEJECT
 				if (boxGameObject != null) {
