@@ -42,9 +42,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private GameObject sphereGameObject;
 	private GameObject boxGameObject;
 	private GameObject skylandGameObject;
+	private GameObject rectangleGameObject;
+	private GameObject cylinderGameObject;
 	private GameObject skyGameObject;
-
-	Array<Model> models;
 
 	boolean isGameView = false;
 
@@ -90,23 +90,11 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		// Init
 		modelBuilder = new ModelBuilder();
-		models = new Array<Model>();
+
 		objectInstances = new ArrayList<ModelInstance>();
 
-		Model skyModel = null;
 		// MODELS
-		Model groundModel = modelBuilder.createBox(30f, 2.5f, 30f,
-				new Material(ColorAttribute.createDiffuse(Color.YELLOW)),
-				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-
-		Model boxModel = modelBuilder.createBox(4f, 4f, 4f,
-				new Material(ColorAttribute.createDiffuse(Color.RED)),
-				VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-
-		Model sphereModel = modelBuilder.createSphere(2, 2, 2, 20, 20,
-				new Material(ColorAttribute.createDiffuse(Color.WHITE), ColorAttribute.createSpecular(Color.GRAY),
-						FloatAttribute.createShininess(64f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-
+		/*Model skyModel = null;
 		Model headModel = null;
 		try {
 			assets = new AssetManager();
@@ -123,15 +111,16 @@ public class AngryPepeMain extends ApplicationAdapter {
 		}
 
 		// Dodanie do listy modeli
-		models.add(skyModel);
-		models.add(groundModel);
-		models.add(headModel);
-		models.add(boxModel);
-		models.add(sphereModel);
+		models.add(ModelManager.SKYLAND1_MODEL);
+		models.add(ModelManager.GROUND);
+		models.add(ModelManager.PEPE_MODEL);
+		models.add(ModelManager.createBox(4, 4, 4));
+		models.add(ModelManager.createSphere(2));
+		*/
 
-		skyInstance = new ModelInstance(skyModel);
-
+		skyInstance = new ModelInstance(ModelManager.SKYDOME_MODEL);
 		skyInstance.transform.scale(20, 20f, 20f);
+
 		objectInstances.add(skyInstance);
 
 		batch = new SpriteBatch();
@@ -148,7 +137,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		// TODO game objects list
 
 		groundGameObject = new GameObject.BodyConstructor(
-				groundModel,
+				ModelManager.GROUND,
 				"ground",
 				null,
 				new Vector3(0f, 0f, 0f),
@@ -157,16 +146,16 @@ public class AngryPepeMain extends ApplicationAdapter {
 		groundGameObject.body.setRestitution(.5f);
 
 		sphereGameObject = new GameObject.BodyConstructor(
-				sphereModel,
+				ModelManager.createSphere(2),
 				"sphere",
-				new btSphereShape(2 / objectScale),
+				new btSphereShape(1),
 				new Vector3(0f, 5f, 0f),
 				1f, 1, true)
 				.construct();
 		sphereGameObject.body.setRestitution(.5f);
 
 		boxGameObject = new GameObject.BodyConstructor(
-				boxModel,
+				ModelManager.createBox(4, 4, 4),
 				"box",
 				new btBoxShape(new Vector3(2, 2, 2)),
 				new Vector3(3f, 1f, 0f),
@@ -174,8 +163,27 @@ public class AngryPepeMain extends ApplicationAdapter {
 				.construct();
 		boxGameObject.body.setRestitution(.5f);
 
+		rectangleGameObject = new GameObject.BodyConstructor(
+				ModelManager.createRectangle(2f, 6f, 2f),
+				"rectangle",
+				null,
+				new Vector3(5f, 1f, 0f),
+				3f, 1f, true)
+				.construct();
+		rectangleGameObject.body.setRestitution(.5f);
+
+		cylinderGameObject = new GameObject.BodyConstructor(
+				ModelManager.createCylinder(2f, 6f, 2f),
+				"cylinder",
+				new btCylinderShape(new Vector3(1f, 3, 1f)),
+				new Vector3(3f, 1f, 7f),
+				3f, 1f, true)
+				.construct();
+		cylinderGameObject.body.setRestitution(.5f);
+		//cylinderGameObject.body.translate(new Vector3(0f, 0f, 5f));
+
 		skylandGameObject = new GameObject.BodyConstructor(
-				headModel,
+				ModelManager.SKYLAND1_MODEL,
 				"skyland",
 				null,
 				new Vector3(-2f, 5f, 0f),
@@ -184,7 +192,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		skylandGameObject.body.setRestitution(.2f);
 
 		playerGameObject = new GameObject.BodyConstructor(
-				pepeModel,
+				ModelManager.PEPE_MODEL,
 				"pepexD",
 				null,
 				new Vector3(0f, 6f, 0f),
@@ -197,6 +205,8 @@ public class AngryPepeMain extends ApplicationAdapter {
 		gameObjectsList.add(boxGameObject);
 		gameObjectsList.add(skylandGameObject);
 		gameObjectsList.add(playerGameObject);
+		gameObjectsList.add(rectangleGameObject);
+		gameObjectsList.add(cylinderGameObject);
 
 		for (GameObject go : gameObjectsList) {
 			objectInstances.add(go.getInstance());
@@ -238,8 +248,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 		img.dispose();
 
 		modelBatch.dispose();
-		for (Model model : models)
-			model.dispose();
 
 		for (btRigidBody body : bodies) {
 			body.dispose();
@@ -260,7 +268,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	public void createRandomGameObject() {
 		GameObject sample = new GameObject.BodyConstructor(
-				pepeModel,
+				ModelManager.PEPE_MODEL,
 				"pepexD",
 				null,
 				new Vector3(0f, 10f, 0f),
@@ -440,12 +448,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 				startX = screenX;
 				startY = screenY;
 			}
-
-			/*if (getObject(screenX, screenY) == 4) {
-				isPulling = true;
-				startX = screenX;
-				startY = screenY;
-			}*/
 			return false;
 		}
 
