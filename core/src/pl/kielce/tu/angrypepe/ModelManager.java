@@ -12,14 +12,11 @@ import com.badlogic.gdx.utils.Disposable;
 import java.lang.String;
 import java.util.ArrayList;
 
-/**
- * Created by patryk on 02.11.2016.
- */
 public final class ModelManager implements Disposable{
 
     public static Model SPHERE;
     public static Model BOX;
-    public static Model RACTANGLE;
+    public static Model RECTANGLE;
     public static Model GROUND;
     public static Model CYLINDER;
 
@@ -69,21 +66,19 @@ public final class ModelManager implements Disposable{
 
     private static Model createGround(float x, float y, float z) {
         GROUND = modelBuilder.createBox(x, y, z,
-                new Material(ColorAttribute.createDiffuse(Color.LIME)),
+                new Material(ColorAttribute.createDiffuse(Color.OLIVE)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         return GROUND;
     }
 
     public static Model createBox(float x, float y, float z) {
         BOX = modelBuilder.createBox(x, y, z,
-                new Material(ColorAttribute.createDiffuse(Color.OLIVE)),
+                new Material(ColorAttribute.createDiffuse(Color.FOREST)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         return BOX;
     }
 
     public static Model createCylinder(float width, float height, float lenght) {
-        //CYLINDER
-
         CYLINDER = modelBuilder.createCylinder(width, height, lenght, 20,
                 new Material(ColorAttribute.createDiffuse(Color.SKY), ColorAttribute.createSpecular(Color.GRAY),
                         FloatAttribute.createShininess(64f)), VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
@@ -98,10 +93,10 @@ public final class ModelManager implements Disposable{
     }
 
     public static Model createRectangle(float x, float y, float z) {
-        RACTANGLE = modelBuilder.createBox(x, y, z,
+        RECTANGLE = modelBuilder.createBox(x, y, z,
                 new Material(ColorAttribute.createDiffuse(Color.PURPLE)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
-        return RACTANGLE;
+        return RECTANGLE;
     }
 
     @Override

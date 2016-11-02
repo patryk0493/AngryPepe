@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.input.GestureDetector;
@@ -31,9 +30,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private boolean isPulling = false;
 
 	private Texture texture;
-	private Model pepeModel;
 
-	public ModelBuilder modelBuilder;
 	public ModelBatch modelBatch;
 	private ModelInstance skyInstance;
 
@@ -44,7 +41,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private GameObject skylandGameObject;
 	private GameObject rectangleGameObject;
 	private GameObject cylinderGameObject;
-	private GameObject skyGameObject;
 
 	boolean isGameView = false;
 
@@ -54,8 +50,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	public float w, h;
 	public float zoom = 1.0f;
-	public float objectScale = 2f;
-	private AssetManager assets;
 	private ArrayList<ModelInstance> objectInstances;
 	private ArrayList<GameObject> gameObjectsList = new ArrayList<GameObject>();
 
@@ -64,10 +58,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private btDbvtBroadphase broadphase;
 	private btSequentialImpulseConstraintSolver solver;
 	private btDiscreteDynamicsWorld world;
-	private Array<btCollisionShape> shapes = new Array<btCollisionShape>();
-	private Array<btRigidBody.btRigidBodyConstructionInfo> bodyInfos = new Array<btRigidBody.btRigidBodyConstructionInfo>();
-	private Array<btRigidBody> bodies = new Array<btRigidBody>();
-
 
 	@Override
 	public void create () {
@@ -87,36 +77,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		texture = new Texture(Gdx.files.internal("sky.jpg"));
 		texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
-
-		// Init
-		modelBuilder = new ModelBuilder();
-
 		objectInstances = new ArrayList<ModelInstance>();
-
-		// MODELS
-		/*Model skyModel = null;
-		Model headModel = null;
-		try {
-			assets = new AssetManager();
-			assets.load("skyland.g3dj", Model.class);
-			assets.load("pepe_box.g3dj", Model.class);
-			assets.load("skydome.g3dj", Model.class);
-			assets.finishLoading();
-			assets.update();
-			headModel = assets.get("skyland.g3dj", Model.class);
-			pepeModel = assets.get("pepe_box.g3dj", Model.class);
-			skyModel = assets.get("skydome.g3dj", Model.class);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		// Dodanie do listy modeli
-		models.add(ModelManager.SKYLAND1_MODEL);
-		models.add(ModelManager.GROUND);
-		models.add(ModelManager.PEPE_MODEL);
-		models.add(ModelManager.createBox(4, 4, 4));
-		models.add(ModelManager.createSphere(2));
-		*/
 
 		skyInstance = new ModelInstance(ModelManager.SKYDOME_MODEL);
 		skyInstance.transform.scale(20, 20f, 20f);
@@ -128,13 +89,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		prepareEnviroment();
 
-		// Initiating Bullet Physics
 		Bullet.init();
 
-		//setting up the world
 		setupWorld(new Vector3(0, -9.81f, 0));
-
-		// TODO game objects list
 
 		groundGameObject = new GameObject.BodyConstructor(
 				ModelManager.GROUND,
@@ -221,7 +178,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		perspectiveCamera.fieldOfView = 40 + (int)(zoom*50);
-		//perspectiveCamera.lookAt(playerGameObject.instance.transform.getTranslation(new Vector3().Zero));
 		perspectiveCamera.update();
 		batch.setProjectionMatrix(perspectiveCamera.combined);
 
@@ -231,12 +187,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 		batch.draw(img, 0, 0);
 		batch.end();
 
+		// 3D
 		world.stepSimulation(Gdx.graphics.getDeltaTime(), 5);
 		for (GameObject gameObject : gameObjectsList) {
 			gameObject.getWorldTransform();
 		}
 
-		// 3D
 		modelBatch.begin(perspectiveCamera);
 		modelBatch.render(objectInstances, environment);
 		modelBatch.end();
@@ -249,14 +205,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		modelBatch.dispose();
 
-		for (btRigidBody body : bodies) {
-			body.dispose();
-		}
-
-		for (btCollisionShape shape : shapes)
-			shape.dispose();
-		for (btRigidBody.btRigidBodyConstructionInfo info : bodyInfos)
-			info.dispose();
 		world.dispose();
 		collisionConfiguration.dispose();
 		dispatcher.dispose();
@@ -269,14 +217,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 	public void createRandomGameObject() {
 		GameObject sample = new GameObject.BodyConstructor(
 				ModelManager.PEPE_MODEL,
-				"pepexD",
+				"PEPE",
 				null,
-				new Vector3(0f, 10f, 0f),
+				new Vector3(0f, 15f, 0f),
 				2f, 1f, true)
 				.construct();
 		sample.body.setRestitution(.1f);
-		sample.body.setFriction(.5f);
-		sample.body.setDamping(0.5f, 0.1f);
 
 		gameObjectsList.add(sample);
 		objectInstances.add(sample.getInstance());
@@ -287,21 +233,13 @@ public class AngryPepeMain extends ApplicationAdapter {
 	public ArrayList<Integer> getObject (int screenX, int screenY) {
 		Ray ray = perspectiveCamera.getPickRay(screenX, screenY);
 		ArrayList<Integer> objectIdList = new ArrayList<Integer>();
-		int result = -1;
-		//float distance = -1;
 		for (int i = 0; i < gameObjectsList.size(); ++i) {
 			final GameObject gameObject = gameObjectsList.get(i);
 			gameObject.getInstance().transform.getTranslation(position);
-			//position.add(gameObject.center);
-			//float dist2 = ray.origin.dst2(position);
-			//if (distance >= 0f && dist2 > distance) continue;
 			if (Intersector.intersectRaySphere(ray, position, gameObject.radius, null)) {
-				result = i;
-				objectIdList.add(i);
-				//distance = dist2;
+				objectIdList.add(gameObject.getObjectId());
 			}
 		}
-		Gdx.app.log("OBJECTS ON RAY", objectIdList.toString());
 		return objectIdList;
 	}
 
@@ -311,7 +249,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
 		environment.add(new DirectionalLight().set(Color.WHITE, new Vector3(-0.5f, -1f , -0.5f)));
 		environment.add(new DirectionalLight().set(Color.WHITE, new Vector3(0.5f, -1f , -0.5f)));
-		//environment.add(new SpotLight().set(Color.WHITE, new Vector3(0, 30, 0), new Vector3(0, 1, 0), 1, 360, 100));
 
 	}
 
@@ -349,6 +286,15 @@ public class AngryPepeMain extends ApplicationAdapter {
 		perspectiveCamera.position.set(0, 10, 25);
 		perspectiveCamera.lookAt(new Vector3().Zero);
 		perspectiveCamera.update();
+	}
+
+	public void removeGameObject(GameObject gameObject) {
+		if (gameObject != null) {
+			world.removeRigidBody(gameObject.getBody());
+			gameObject.destroy();
+			gameObjectsList.remove(gameObject);
+			objectInstances.remove(gameObject.instance);
+		}
 	}
 
 	class MyInputProcessor implements InputProcessor {
@@ -395,10 +341,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 			if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
 				playerGameObject.body.applyImpulse(new Vector3(0, power * 3, 0), new Vector3().Zero);
-				//playerGameObject.body.applyForce(new Vector3(0, power * 3, 0), new Vector3().Zero);
-				//playerGameObject.body.applyCentralForce(new Vector3(0, power * 3, 0));
-				//playerGameObject.body.applyTorque(new Vector3(0, power * 30, 0));
-				//playerGameObject.body.setActivationState(1);
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.A))
@@ -411,15 +353,8 @@ public class AngryPepeMain extends ApplicationAdapter {
 				setSideView();
 			}
 
-
-			if(Gdx.input.isKeyPressed(Input.Keys.D)) { //REMOVE GAME OBEJECT
-				if (boxGameObject != null) {
-					world.removeRigidBody(boxGameObject.getBody());
-					boxGameObject.destroy();
-					gameObjectsList.remove(boxGameObject);
-					objectInstances.remove(boxGameObject.instance);
-					boxGameObject = null;
-				}
+			if(Gdx.input.isKeyPressed(Input.Keys.D)) {
+				removeGameObject(boxGameObject);
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_LEFT))
@@ -441,9 +376,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 			Gdx.app.log("LOGGER", getObject(screenX, screenY) +"");
 			Gdx.app.log("TOUCH DOWN: ", "x: " + screenX + " y:" + screenY);
 
-			// TODO ZMIANA 4 NA STALE ID
-
-			if (getObject(screenX, screenY).contains(4)) {
+			if (getObject(screenX, screenY).contains(6)) {
 				isPulling = true;
 				startX = screenX;
 				startY = screenY;

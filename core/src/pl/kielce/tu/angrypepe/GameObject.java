@@ -28,6 +28,8 @@ public class GameObject {
     public final Vector3 center = new Vector3();
     public final Vector3 dimensions = new Vector3();
     public float radius = 0;
+    public int objectId;
+    private static int id = 0;
 
     public GameObject(Model model, ModelInstance instance, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo,
                        float scaleRatio, boolean createMotionState) {
@@ -49,6 +51,9 @@ public class GameObject {
         bounds.getCenter(center);
         bounds.getDimensions(dimensions);
         this.radius = dimensions.len() / 2f;
+        objectId = id;
+        id++;
+
     }
 
     public btRigidBody getBody() {
@@ -65,6 +70,10 @@ public class GameObject {
 
     public ModelInstance getInstance() {
         return instance;
+    }
+
+    public int getObjectId() {
+        return objectId;
     }
 
     public void getWorldTransform() {
