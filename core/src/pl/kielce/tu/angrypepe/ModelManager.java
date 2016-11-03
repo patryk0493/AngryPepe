@@ -23,10 +23,12 @@ public final class ModelManager implements Disposable{
     protected static String SKYLAND1 = "skyland.g3dj";
     protected static String PEPE = "pepe_box.g3dj";
     protected static String SKYDOME = "skydome.g3dj";
+    protected static String TEST = "123.g3dj";
 
     public static Model SKYLAND1_MODEL;
     public static Model PEPE_MODEL;
     public static Model SKYDOME_MODEL;
+    public static Model TEST_MODEL;
 
     private static AssetManager assets;
     private static ModelBuilder modelBuilder = new ModelBuilder();
@@ -51,17 +53,19 @@ public final class ModelManager implements Disposable{
         assets.load(SKYLAND1, Model.class);
         assets.load(PEPE, Model.class);
         assets.load(SKYDOME, Model.class);
+        assets.load(TEST, Model.class);
         assets.finishLoading();
         assets.update();
 
         SKYLAND1_MODEL = assets.get(SKYLAND1, Model.class);
         PEPE_MODEL = assets.get(PEPE, Model.class);
         SKYDOME_MODEL = assets.get(SKYDOME, Model.class);
+        TEST_MODEL = assets.get(TEST, Model.class);
 
         modelArrayList.add(SKYLAND1_MODEL);
         modelArrayList.add(PEPE_MODEL);
         modelArrayList.add(SKYDOME_MODEL);
-
+        modelArrayList.add(TEST_MODEL);
     }
 
     private static Model createGround(float x, float y, float z) {

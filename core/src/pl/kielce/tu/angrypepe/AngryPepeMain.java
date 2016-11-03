@@ -1,23 +1,19 @@
 package pl.kielce.tu.angrypepe;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.*;
+import com.badlogic.gdx.physics.bullet.collision.ContactListener;
 import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
-import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
-import com.badlogic.gdx.utils.Array;
-
 import java.util.ArrayList;
 
 public class AngryPepeMain extends ApplicationAdapter {
@@ -47,6 +43,8 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private InputMultiplexer inputMultiplexer;
 	private MyInputProcessor inputProcessor;
 	private MyGestureHandler gestureHandler;
+
+	MyContactListener contactListener;
 
 	public float w, h;
 	public float zoom = 1.0f;
@@ -80,7 +78,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		objectInstances = new ArrayList<ModelInstance>();
 
 		skyInstance = new ModelInstance(ModelManager.SKYDOME_MODEL);
-		skyInstance.transform.scale(20, 20f, 20f);
+		skyInstance.transform.scale(20f, 20f, 20f);
 
 		objectInstances.add(skyInstance);
 
@@ -169,6 +167,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 			objectInstances.add(go.getInstance());
 			world.addRigidBody(go.getBody());
 		}
+
+		createWall();
+
+		contactListener = new MyContactListener();
 	}
 
 	@Override
@@ -210,23 +212,53 @@ public class AngryPepeMain extends ApplicationAdapter {
 		dispatcher.dispose();
 		broadphase.dispose();
 		solver.dispose();
+
+		contactListener.dispose();
+
 		Gdx.app.log(this.getClass().getName(), "Disposed");
 
 	}
 
 	public void createRandomGameObject() {
 		GameObject sample = new GameObject.BodyConstructor(
-				ModelManager.PEPE_MODEL,
+				ModelManager.createSphere(1f),
 				"PEPE",
 				null,
 				new Vector3(0f, 15f, 0f),
 				2f, 1f, true)
 				.construct();
-		sample.body.setRestitution(.1f);
+		sample.body.setRestitution(.8f);
+		sample.body.setFriction(0.5f);
 
 		gameObjectsList.add(sample);
 		objectInstances.add(sample.getInstance());
 		world.addRigidBody(sample.getBody());
+
+	}
+
+	public void createWall() {
+
+		for (int i = 0; i< 5; i++) {
+
+			for (int j = 0; j < 7; j++) {
+
+				GameObject sample = new GameObject.BodyConstructor(
+						ModelManager.createBox(2, 2, 2),
+						"PEPE",
+						null,
+						new Vector3(10f, i*2, j*2),
+						2f, 1f, true)
+						.construct();
+				sample.body.setRestitution(.8f);
+				sample.body.setFriction(0.5f);
+
+				gameObjectsList.add(sample);
+				objectInstances.add(sample.getInstance());
+				world.addRigidBody(sample.getBody());
+
+			}
+
+		}
 
 	}
 
@@ -289,8 +321,15 @@ public class AngryPepeMain extends ApplicationAdapter {
 	}
 
 	public void removeGameObject(GameObject gameObject) {
+
+		// TODO CZASEM WYWALA BLAD
 		if (gameObject != null) {
-			world.removeRigidBody(gameObject.getBody());
+			try {
+				world.removeRigidBody(gameObject.getBody());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 			gameObject.destroy();
 			gameObjectsList.remove(gameObject);
 			objectInstances.remove(gameObject.instance);
@@ -413,9 +452,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		@Override
 		public boolean touchDown(float x, float y, int pointer, int button) {
-			/*Gdx.app.log("TOUCH DOWN: ", "x: " + x + " y:" + y);
+			Gdx.app.log("TOUCH DOWN: ", "x: " + x + " y:" + y);
 			initialScale = zoom;
-
+			/*
 			getObject((int) x, (int) y);
 			startX = x;
 			startY = y;*/
@@ -475,6 +514,70 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		}
 
+	}
+
+	class MyContactListener extends ContactListener {
+		@Override
+		public void onContactStarted (btCollisionObject colObj0, btCollisionObject colObj1) {
+
+			CustomObjectData customObjectData1 = (CustomObjectData) colObj0.userData;
+			CustomObjectData customObjectData2  = (CustomObjectData) colObj1.userData;
+
+			GameObject go1 = getCollistionObject(customObjectData1.getId());
+			GameObject go2 = getCollistionObject(customObjectData2.getId());
+
+			if ( (go1.getObjectId() == 6) || (go2.getObjectId() == 6) ) {
+
+				if(!go1.body.isStaticObject())
+					go1.getUsetData().updateHp(getMaxVelecity(go1.body.getLinearVelocity()) * go1.getBody().getInvMass() +
+							getMaxVelecity(go2.body.getLinearVelocity()) * go2.getBody().getInvMass());
+				if(!go2.body.isStaticObject())
+					go2.getUsetData().updateHp(getMaxVelecity(go2.body.getLinearVelocity()) * go2.getBody().getInvMass() +
+						getMaxVelecity(go1.body.getLinearVelocity()) * go1.getBody().getInvMass() );
+
+				System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
+				System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
+			}
+
+			if ( go1.getUsetData().getHp() < 0) {
+				removeGameObject(go1 );
+			}
+
+			if ( go2.getUsetData().getHp() < 0) {
+				removeGameObject(go2);
+			}
+
+		}
+
+		public GameObject getCollistionObject ( int id ) {
+			for (GameObject gameObject : gameObjectsList) {
+				if (id == gameObject.getObjectId())
+					return gameObject;
+			}
+			return null;
+		}
+
+		public float getMaxVelecity(Vector3 vector) {
+
+			float maxVelocity = 0;
+
+			if (  Math.abs(vector.x) > maxVelocity )
+				maxVelocity = Math.abs(vector.x);
+
+			if (  Math.abs(vector.y) > maxVelocity )
+				maxVelocity = Math.abs(vector.y);
+
+			if (  Math.abs(vector.z) > maxVelocity )
+				maxVelocity = Math.abs(vector.z);
+
+			return maxVelocity;
+
+		}
+
+		@Override
+		public void onContactProcessed (int userValue0, int userValue1) {
+			// implementation
+		}
 	}
 
 	@Override

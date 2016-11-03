@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Disposable;
 /**
  * Created by patryk on 30.10.2016.
  */
-public class GameObject {
+public class GameObject implements Disposable{
 
 
     public btRigidBody body;
@@ -22,7 +22,6 @@ public class GameObject {
     public ModelInstance instance;
     public btDefaultMotionState motionState = null;
     protected float scaleRatio;
-    public float healthPoints = 100;
 
     private final static BoundingBox bounds = new BoundingBox();
     public final Vector3 center = new Vector3();
@@ -52,8 +51,18 @@ public class GameObject {
         bounds.getDimensions(dimensions);
         this.radius = dimensions.len() / 2f;
         objectId = id;
+        body.userData = new CustomObjectData();
+        getUsetData().setId(objectId);
         id++;
 
+    }
+
+    public void setUserData(CustomObjectData customObjectData) {
+        body.userData = customObjectData;
+    }
+
+    public CustomObjectData getUsetData() {
+        return (CustomObjectData) body.userData;
     }
 
     public btRigidBody getBody() {
@@ -90,6 +99,11 @@ public class GameObject {
     public void destroy() {
         body.dispose();
         instance.model.dispose();
+    }
+
+    @Override
+    public void dispose() {
+
     }
 
     static class BodyConstructor implements Disposable {
