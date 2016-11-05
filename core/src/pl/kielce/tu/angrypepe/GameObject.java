@@ -38,7 +38,7 @@ public class GameObject implements Disposable{
         this.instance = instance;
         body = new btRigidBody(constructionInfo);
         body.setActivationState(Collision.DISABLE_DEACTIVATION); // Naprawia poruszanie obiektu,gdy wektor ruchuchu = 0
-
+        body.setRestitution(0.2f);
         if (createMotionState) {
             motionState = new btDefaultMotionState(this.instance.transform);
             motionState.setWorldTransform(this.instance.transform);
@@ -51,8 +51,7 @@ public class GameObject implements Disposable{
         bounds.getDimensions(dimensions);
         this.radius = dimensions.len() / 2f;
         objectId = id;
-        body.userData = new CustomObjectData();
-        getUsetData().setId(objectId);
+        this.setUserData(new CustomObjectData(objectId));
         id++;
 
     }
@@ -103,7 +102,9 @@ public class GameObject implements Disposable{
 
     @Override
     public void dispose() {
-
+        motionState.dispose();
+        body.dispose();
+        instance.model.dispose();
     }
 
     static class BodyConstructor implements Disposable {
@@ -169,6 +170,7 @@ public class GameObject implements Disposable{
         public void dispose () {
             shape.dispose();
             constructionInfo.dispose();
+            instance.model.dispose();
         }
 
     }

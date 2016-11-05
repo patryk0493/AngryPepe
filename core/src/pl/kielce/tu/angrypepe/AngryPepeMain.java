@@ -2,7 +2,6 @@ package pl.kielce.tu.angrypepe;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
@@ -17,15 +16,11 @@ import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSol
 import java.util.ArrayList;
 
 public class AngryPepeMain extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
 
-	private PerspectiveCamera perspectiveCamera;
+	private CameraManager cam;
 	public Environment environment;
 	private Vector3 position = new Vector3();
 	private boolean isPulling = false;
-
-	private Texture texture;
 
 	public ModelBatch modelBatch;
 	private ModelInstance skyInstance;
@@ -47,7 +42,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 	MyContactListener contactListener;
 
 	public float w, h;
-	public float zoom = 1.0f;
 	private ArrayList<ModelInstance> objectInstances;
 	private ArrayList<GameObject> gameObjectsList = new ArrayList<GameObject>();
 
@@ -64,26 +58,16 @@ public class AngryPepeMain extends ApplicationAdapter {
 		h = Gdx.graphics.getHeight();
 
 		initaliseInputProcessors();
-		batch = new SpriteBatch();
 		modelBatch = new ModelBatch();
 
-		perspectiveCamera = new PerspectiveCamera(100, w, h);
-		perspectiveCamera.near = 0.1f;
-		perspectiveCamera.far = 500f;
-		setSideView();
-
-		texture = new Texture(Gdx.files.internal("sky.jpg"));
-		texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+		cam = new CameraManager();
 
 		objectInstances = new ArrayList<ModelInstance>();
 
 		skyInstance = new ModelInstance(ModelManager.SKYDOME_MODEL);
-		skyInstance.transform.scale(20f, 20f, 20f);
+		//skyInstance.transform.scale(20f, 20f, 20f);
 
 		objectInstances.add(skyInstance);
-
-		batch = new SpriteBatch();
-		img = new Texture(Gdx.files.internal("badlogic.jpg"));
 
 		prepareEnviroment();
 
@@ -98,7 +82,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 				new Vector3(0f, 0f, 0f),
 				0f, 1, false)
 				.construct();
-		groundGameObject.body.setRestitution(.5f);
+		System.out.println(groundGameObject.body.getRestitution());
 
 		sphereGameObject = new GameObject.BodyConstructor(
 				ModelManager.createSphere(2),
@@ -107,7 +91,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 				new Vector3(0f, 5f, 0f),
 				1f, 1, true)
 				.construct();
-		sphereGameObject.body.setRestitution(.5f);
 
 		boxGameObject = new GameObject.BodyConstructor(
 				ModelManager.createBox(4, 4, 4),
@@ -116,7 +99,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 				new Vector3(3f, 1f, 0f),
 				1f, 1f, true)
 				.construct();
-		boxGameObject.body.setRestitution(.5f);
 
 		rectangleGameObject = new GameObject.BodyConstructor(
 				ModelManager.createRectangle(2f, 6f, 2f),
@@ -125,7 +107,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 				new Vector3(5f, 1f, 0f),
 				3f, 1f, true)
 				.construct();
-		rectangleGameObject.body.setRestitution(.5f);
 
 		cylinderGameObject = new GameObject.BodyConstructor(
 				ModelManager.createCylinder(2f, 6f, 2f),
@@ -134,8 +115,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 				new Vector3(3f, 1f, 7f),
 				3f, 1f, true)
 				.construct();
-		cylinderGameObject.body.setRestitution(.5f);
-		//cylinderGameObject.body.translate(new Vector3(0f, 0f, 5f));
 
 		skylandGameObject = new GameObject.BodyConstructor(
 				ModelManager.SKYLAND1_MODEL,
@@ -144,7 +123,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 				new Vector3(-2f, 5f, 0f),
 				2f, 1f, true)
 				.construct();
-		skylandGameObject.body.setRestitution(.2f);
 
 		playerGameObject = new GameObject.BodyConstructor(
 				ModelManager.PEPE_MODEL,
@@ -153,7 +131,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 				new Vector3(0f, 6f, 0f),
 				2f, 1f, true)
 				.construct();
-		playerGameObject.body.setRestitution(.5f);
+		playerGameObject.setUserData(playerGameObject.getUsetData().setDestructible(false).setName("PEPE"));
 
 		gameObjectsList.add(groundGameObject);
 		gameObjectsList.add(sphereGameObject);
@@ -179,15 +157,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-		perspectiveCamera.fieldOfView = 40 + (int)(zoom*50);
-		perspectiveCamera.update();
-		batch.setProjectionMatrix(perspectiveCamera.combined);
-
-		// 2D
-		batch.begin();
-		batch.draw(texture, -texture.getWidth()/2, -texture.getHeight()/2);
-		batch.draw(img, 0, 0);
-		batch.end();
+		cam.changeFieldOfView();
+		cam.update(playerGameObject.instance.transform.getTranslation(new Vector3().Zero));
+		cam.followPlayer();
 
 		// 3D
 		world.stepSimulation(Gdx.graphics.getDeltaTime(), 5);
@@ -195,15 +167,13 @@ public class AngryPepeMain extends ApplicationAdapter {
 			gameObject.getWorldTransform();
 		}
 
-		modelBatch.begin(perspectiveCamera);
+		modelBatch.begin(cam);
 		modelBatch.render(objectInstances, environment);
 		modelBatch.end();
 	}
 	
 	@Override
 	public void dispose () {
-		batch.dispose();
-		img.dispose();
 
 		modelBatch.dispose();
 
@@ -221,7 +191,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	public void createRandomGameObject() {
 		GameObject sample = new GameObject.BodyConstructor(
-				ModelManager.createSphere(1f),
+				ModelManager.PEPE_MODEL,
 				"PEPE",
 				null,
 				new Vector3(0f, 15f, 0f),
@@ -237,11 +207,8 @@ public class AngryPepeMain extends ApplicationAdapter {
 	}
 
 	public void createWall() {
-
 		for (int i = 0; i< 5; i++) {
-
 			for (int j = 0; j < 7; j++) {
-
 				GameObject sample = new GameObject.BodyConstructor(
 						ModelManager.createBox(2, 2, 2),
 						"PEPE",
@@ -249,21 +216,16 @@ public class AngryPepeMain extends ApplicationAdapter {
 						new Vector3(10f, i*2, j*2),
 						2f, 1f, true)
 						.construct();
-				sample.body.setRestitution(.8f);
-				sample.body.setFriction(0.5f);
 
 				gameObjectsList.add(sample);
 				objectInstances.add(sample.getInstance());
 				world.addRigidBody(sample.getBody());
-
 			}
-
 		}
-
 	}
 
 	public ArrayList<Integer> getObject (int screenX, int screenY) {
-		Ray ray = perspectiveCamera.getPickRay(screenX, screenY);
+		Ray ray = cam.getPickRay(screenX, screenY);
 		ArrayList<Integer> objectIdList = new ArrayList<Integer>();
 		for (int i = 0; i < gameObjectsList.size(); ++i) {
 			final GameObject gameObject = gameObjectsList.get(i);
@@ -308,18 +270,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 		inputMultiplexer.addProcessor(inputProcessor);
 	}
 
-	public void setTopCameraView() {
-		perspectiveCamera.position.set(0, 20, 0);
-		perspectiveCamera.lookAt(new Vector3().Zero);
-		perspectiveCamera.update();
-	}
-
-	public void setSideView() {
-		perspectiveCamera.position.set(0, 10, 25);
-		perspectiveCamera.lookAt(new Vector3().Zero);
-		perspectiveCamera.update();
-	}
-
 	public void removeGameObject(GameObject gameObject) {
 
 		// TODO CZASEM WYWALA BLAD
@@ -329,8 +279,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			gameObject.destroy();
+			// TAK DZIALA LEPIEJ
+			//gameObject.body.dispose();
+			//gameObject.model.dispose();
+			//gameObject.destroy();
 			gameObjectsList.remove(gameObject);
 			objectInstances.remove(gameObject.instance);
 		}
@@ -344,15 +296,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		@Override
 		public boolean scrolled(int amount) {
 
-			//Zoom out
-			if (amount > 0 && zoom < 1) {
-				zoom += 0.02f;
-			}
-
-			//Zoom in
-			if (amount < 0 && zoom > 0.1) {
-				zoom -= 0.02f;
-			}
+			cam.changeZoom(amount);
 
 			return true;
 		}
@@ -379,17 +323,20 @@ public class AngryPepeMain extends ApplicationAdapter {
 			final float power = 3;
 
 			if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-				playerGameObject.body.applyImpulse(new Vector3(0, power * 3, 0), new Vector3().Zero);
+				playerGameObject.body.applyCentralImpulse( new Vector3(0, power * 3, 0) );
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.A))
 				createRandomGameObject();
 
 			if(Gdx.input.isKeyPressed(Input.Keys.P)) {
-				setTopCameraView();
+				cam.setCurrentView(CameraManager.View.SIDE);
 			}
 			if(Gdx.input.isKeyPressed(Input.Keys.O)) {
-				setSideView();
+				cam.setCurrentView(CameraManager.View.TOP);
+			}
+			if(Gdx.input.isKeyPressed(Input.Keys.I)) {
+				cam.setCurrentView(CameraManager.View.FRONT);
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.D)) {
@@ -397,13 +344,13 @@ public class AngryPepeMain extends ApplicationAdapter {
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_LEFT))
-				playerGameObject.body.applyImpulse(new Vector3(-power, 0, 0), new Vector3().Zero);
+				playerGameObject.body.applyCentralImpulse(new Vector3(-power, 0, 0));
 			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_RIGHT))
-				playerGameObject.body.applyImpulse(new Vector3(power, 0, 0), new Vector3().Zero);
+				playerGameObject.body.applyCentralImpulse(new Vector3(power, 0, 0));
 			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_UP))
-				playerGameObject.body.applyImpulse(new Vector3(0, 0, -power), new Vector3().Zero);
+				playerGameObject.body.applyCentralImpulse(new Vector3(0, 0, -power));
 			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_DOWN))
-				playerGameObject.body.applyImpulse(new Vector3(0, 0, power), new Vector3().Zero);
+				playerGameObject.body.applyCentralImpulse(new Vector3(0, 0, power));
 
 			return false;
 		}
@@ -453,7 +400,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		@Override
 		public boolean touchDown(float x, float y, int pointer, int button) {
 			Gdx.app.log("TOUCH DOWN: ", "x: " + x + " y:" + y);
-			initialScale = zoom;
+			cam.updateInitialScale();
 			/*
 			getObject((int) x, (int) y);
 			startX = x;
@@ -465,9 +412,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		@Override
 		public boolean zoom(float initialDistance, float distance) {
 
-			float ratio = initialDistance / distance;
-			zoom = MathUtils.clamp(initialScale * ratio, 0.1f, 1f);
-			//System.out.println("Zoom: " + zoom);
+			cam.calculateZoom(initialDistance, distance);
 			return true;
 		}
 
@@ -490,9 +435,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 		public boolean pan(float x, float y, float deltaX, float deltaY) {
 
 			if (!isPulling) {
-				final float scalar = 0.2f;
-				Vector3 transVec = new Vector3(-deltaX * zoom * scalar, deltaY * zoom * scalar, 0);
-				perspectiveCamera.translate(transVec);
+				cam.panCamera(deltaX, deltaY);
 			}
 
 			return false;
@@ -506,6 +449,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 		@Override
 		public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2,
 							 Vector2 pointer1, Vector2 pointer2) {
+
+			System.out.println(initialPointer1.toString() + " : " + initialPointer2.toString() +
+				" : " + pointer1.toString() + " : " + pointer2.toString());
+
 			return false;
 		}
 
@@ -526,27 +473,47 @@ public class AngryPepeMain extends ApplicationAdapter {
 			GameObject go1 = getCollistionObject(customObjectData1.getId());
 			GameObject go2 = getCollistionObject(customObjectData2.getId());
 
-			if ( (go1.getObjectId() == 6) || (go2.getObjectId() == 6) ) {
+			if(!go1.body.isStaticObject())
+				go1.getUsetData().updateHp( calculateMomentum(go1, go2) );
+			if(!go2.body.isStaticObject())
+				go2.getUsetData().updateHp( calculateMomentum(go1, go2) );
 
-				if(!go1.body.isStaticObject())
-					go1.getUsetData().updateHp(getMaxVelecity(go1.body.getLinearVelocity()) * go1.getBody().getInvMass() +
-							getMaxVelecity(go2.body.getLinearVelocity()) * go2.getBody().getInvMass());
-				if(!go2.body.isStaticObject())
-					go2.getUsetData().updateHp(getMaxVelecity(go2.body.getLinearVelocity()) * go2.getBody().getInvMass() +
-						getMaxVelecity(go1.body.getLinearVelocity()) * go1.getBody().getInvMass() );
+			System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
+			System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
 
-				System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
-				System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
+			// TODO FIX WYWALA BLAD CZASEM
+			// TODO PRZENIECSC NISZCZENIE OBIEKTU
+			if ( go1.getUsetData().getHp() < 0f && go1.getUsetData().isDestructible()) {
+				removeGameObject(go1);
 			}
-
-			if ( go1.getUsetData().getHp() < 0) {
-				removeGameObject(go1 );
-			}
-
-			if ( go2.getUsetData().getHp() < 0) {
+			if ( go2.getUsetData().getHp() < 0f && go2.getUsetData().isDestructible()) {
 				removeGameObject(go2);
 			}
 
+		}
+
+		/*@Override
+		public void onContactEnded (btCollisionObject colObj0, btCollisionObject colObj1) {
+
+			CustomObjectData customObjectData1 = (CustomObjectData) colObj0.userData;
+			CustomObjectData customObjectData2  = (CustomObjectData) colObj1.userData;
+
+			GameObject go1 = getCollistionObject(customObjectData1.getId());
+			GameObject go2 = getCollistionObject(customObjectData2.getId());
+
+			if ( go1.getUsetData().getHp() < 0f && go1.getUsetData().isDestructible()) {
+				removeGameObject(go1);
+			}
+			if ( go2.getUsetData().getHp() < 0f && go2.getUsetData().isDestructible()) {
+				removeGameObject(go2);
+			}
+		}*/
+
+		public float calculateMomentum(GameObject o1, GameObject o2) {
+			float momentum;
+			momentum = getMaxVelecity(o1.body.getLinearVelocity()) * o1.getBody().getInvMass() +
+					getMaxVelecity(o2.body.getLinearVelocity()) * o2.getBody().getInvMass();
+			return momentum;
 		}
 
 		public GameObject getCollistionObject ( int id ) {
@@ -558,20 +525,14 @@ public class AngryPepeMain extends ApplicationAdapter {
 		}
 
 		public float getMaxVelecity(Vector3 vector) {
-
 			float maxVelocity = 0;
-
 			if (  Math.abs(vector.x) > maxVelocity )
 				maxVelocity = Math.abs(vector.x);
-
 			if (  Math.abs(vector.y) > maxVelocity )
 				maxVelocity = Math.abs(vector.y);
-
 			if (  Math.abs(vector.z) > maxVelocity )
 				maxVelocity = Math.abs(vector.z);
-
 			return maxVelocity;
-
 		}
 
 		@Override
@@ -584,9 +545,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 	public void resize(int width, int height) {
 		w = width;
 		h = height;
-		perspectiveCamera.viewportWidth = width;
-		perspectiveCamera.viewportHeight = height;
-		perspectiveCamera.update(true);
+		cam.updateViewport(width, height);
 	}
 
 	@Override
