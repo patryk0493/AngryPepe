@@ -52,29 +52,33 @@ public class CameraManager extends PerspectiveCamera{
     }
 
     public void setSideView(Vector3 playerPos) {
-        //this.position.set(0f, 10f, 25f);
         this.position.x = this.position.x + (playerPos.x - this.position.x) * 0.05f;
-        this.position.y = this.position.y + 0.4f + (playerPos.y - this.position.y) * 0.05f;
+        this.position.y = this.position.y + 0.2f + (playerPos.y - this.position.y) * 0.05f;
         this.position.z = this.position.z + 1.1f + (playerPos.z - this.position.z) * 0.05f;
         //if(isFollow)
-        //this.lookAt(new Vector3().Zero);
+        this.lookAt(new Vector3().Zero);
         this.up.set(new Vector3(0f, 1f, 0f));
         this.update();
     }
 
     public void setTopCameraView(Vector3 playerPos) {
-        this.position.set(0f, 20f, 0f);
+        //this.position.set(0f, 20f, 0f);
+        this.position.x = this.position.x + (playerPos.x - this.position.x) * 0.05f;
+        this.position.y = this.position.y + 1.2f + (playerPos.y - this.position.y) * 0.05f;
+        this.position.z = this.position.z + (playerPos.z - this.position.z) * 0.05f;
         if(isFollow)
-            //this.lookAt(new Vector3().Zero);
-        this.up.set(new Vector3(0f, 1f, 0f));
+        this.lookAt(playerPos);
         this.update();
     }
 
     public void setFrontView(Vector3 playerPos) {
-        this.position.set(-10f, 20f, 0f);
+        this.position.x = this.position.x - 1.2f  + (playerPos.x - this.position.x) * 0.05f;
+        this.position.y = this.position.y + 0.2f + (playerPos.y - this.position.y) * 0.05f;
+        this.position.z = this.position.z + (playerPos.z - this.position.z) * 0.05f;
+
+        this.lookAt(playerPos);
         if(isFollow)
-            //this.lookAt(new Vector3(0f, 0f, -1f));
-        //this.up.set(new Vector3(0, 1, 0));
+        this.up.set(new Vector3(0, 1, 0));
         this.update();
     }
 

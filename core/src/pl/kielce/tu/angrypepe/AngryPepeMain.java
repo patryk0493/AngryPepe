@@ -33,6 +33,8 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private GameObject rectangleGameObject;
 	private GameObject cylinderGameObject;
 
+	private GameObject hintGameObject;
+
 	boolean isGameView = false;
 
 	private InputMultiplexer inputMultiplexer;
@@ -44,6 +46,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 	public float w, h;
 	private ArrayList<ModelInstance> objectInstances;
 	private ArrayList<GameObject> gameObjectsList = new ArrayList<GameObject>();
+	private ArrayList<GameObject> hintsObjectList = new ArrayList<GameObject>();
 
 	private btDefaultCollisionConfiguration collisionConfiguration;
 	private btCollisionDispatcher dispatcher;
@@ -65,7 +68,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 		objectInstances = new ArrayList<ModelInstance>();
 
 		skyInstance = new ModelInstance(ModelManager.SKYDOME_MODEL);
-		//skyInstance.transform.scale(20f, 20f, 20f);
 
 		objectInstances.add(skyInstance);
 
@@ -132,6 +134,20 @@ public class AngryPepeMain extends ApplicationAdapter {
 				2f, 1f, true)
 				.construct();
 		playerGameObject.setUserData(playerGameObject.getUsetData().setDestructible(false).setName("PEPE"));
+
+
+		hintGameObject = new GameObject.BodyConstructor(
+				ModelManager.createSphere(1),
+				"hint",
+				new btSphereShape(0.5f),
+				new Vector3(0f, 0f, 0f),
+				1f, 1, true)
+				.construct();
+		hintGameObject.body.setCollisionFlags( playerGameObject.body.getCollisionFlags()
+				| btCollisionObject.CollisionFlags.CF_NO_CONTACT_RESPONSE);
+
+		for (int i = 0; i < 10; i++)
+			hintsObjectList.add(hintGameObject);
 
 		gameObjectsList.add(groundGameObject);
 		gameObjectsList.add(sphereGameObject);
@@ -375,8 +391,18 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 			Gdx.app.log("TOUCH UP: ", "x: " + screenX + " y:" + screenY);
 			if (isPulling) {
-				float powerX = (startX - screenX) * 0.5f;
-				float powerY = (startY - screenY) * 0.5f;
+				float maxPower = 30f;
+				float powerScale = 0.4f;
+				float powerX = (startX - screenX) * powerScale;
+				float powerY = (startY - screenY) * powerScale;
+
+				if (Math.abs(powerX) > maxPower) {
+					powerX = maxPower;
+				}
+				if (Math.abs(powerY) > maxPower) {
+					powerY = -maxPower;
+				}
+
 				Gdx.app.log("POWER: ", "x: " + powerX + " y:" + powerY);
 				playerGameObject.body.applyCentralImpulse(new Vector3(powerX, -powerY, 0));
 				isPulling = false;
@@ -481,33 +507,18 @@ public class AngryPepeMain extends ApplicationAdapter {
 			System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
 			System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
 
-			// TODO FIX WYWALA BLAD CZASEM
-			// TODO PRZENIECSC NISZCZENIE OBIEKTU
 			if ( go1.getUsetData().getHp() < 0f && go1.getUsetData().isDestructible()) {
+				go2.body.setLinearVelocity(go2.body.getLinearVelocity().scl(go1.body.getInvMass()));
 				removeGameObject(go1);
+
 			}
 			if ( go2.getUsetData().getHp() < 0f && go2.getUsetData().isDestructible()) {
+				go1.body.setLinearVelocity(go1.body.getLinearVelocity().scl(go2.body.getInvMass()));
 				removeGameObject(go2);
+
 			}
 
 		}
-
-		/*@Override
-		public void onContactEnded (btCollisionObject colObj0, btCollisionObject colObj1) {
-
-			CustomObjectData customObjectData1 = (CustomObjectData) colObj0.userData;
-			CustomObjectData customObjectData2  = (CustomObjectData) colObj1.userData;
-
-			GameObject go1 = getCollistionObject(customObjectData1.getId());
-			GameObject go2 = getCollistionObject(customObjectData2.getId());
-
-			if ( go1.getUsetData().getHp() < 0f && go1.getUsetData().isDestructible()) {
-				removeGameObject(go1);
-			}
-			if ( go2.getUsetData().getHp() < 0f && go2.getUsetData().isDestructible()) {
-				removeGameObject(go2);
-			}
-		}*/
 
 		public float calculateMomentum(GameObject o1, GameObject o2) {
 			float momentum;
