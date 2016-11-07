@@ -25,6 +25,8 @@ public final class ModelManager implements Disposable{
     protected static String SKYDOME = "skydome.g3dj";
     protected static String TEST = "123.g3dj";
 
+    public static String PARTICLE = "cloudpuff.pfx";
+
     public static Model SKYLAND1_MODEL;
     public static Model PEPE_MODEL;
     public static Model SKYDOME_MODEL;

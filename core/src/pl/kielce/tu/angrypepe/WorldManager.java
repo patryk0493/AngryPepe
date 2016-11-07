@@ -3,6 +3,7 @@ package pl.kielce.tu.angrypepe;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
@@ -27,6 +28,7 @@ public class WorldManager {
     private boolean isPulling = false;
 
     private ModelInstance skyInstance;
+    public ModelBatch modelBatch;
 
     private GameObject playerGameObject;
     private GameObject groundGameObject;
@@ -52,24 +54,24 @@ public class WorldManager {
     private btSequentialImpulseConstraintSolver solver;
     private btDiscreteDynamicsWorld world;
 
+    private Particile particleUtils;
 
     public void initWorld() {
 
+        modelBatch = new ModelBatch();
         cam = new CameraManager();
-
         objectInstances = new ArrayList<ModelInstance>();
-
         skyInstance = new ModelInstance(ModelManager.SKYDOME_MODEL);
-
         objectInstances.add(skyInstance);
 
         prepareEnviroment();
-
         Bullet.init();
-
         setupWorld(new Vector3(0, -9.81f, 0));
 
         createGameObjects();
+
+        particleUtils = new Particile();
+        particleUtils.initBillBoardParticles(cam);
 
         contactListener = new MyContactListener();
 
@@ -172,23 +174,32 @@ public class WorldManager {
         cam.followPlayer();
 
         // 3D
-        world.stepSimulation(Gdx.graphics.getDeltaTime(), 5);
-        for (GameObject gameObject : gameObjectsList) {
-            gameObject.getWorldTransform();
+        try {
+            // TODO jesli nie dziala znimic parametry
+            world.stepSimulation(Gdx.graphics.getDeltaTime(), 1);
+            for (GameObject gameObject : gameObjectsList) {
+                gameObject.getWorldTransform();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
+        modelBatch.begin(cam);
+        modelBatch.render(objectInstances, environment);
+        modelBatch.render(particleUtils.updateAndDraw(), environment);
+        modelBatch.end();
     }
 
     public void createRandomGameObject() {
         GameObject sample = new GameObject.BodyConstructor(
-                ModelManager.PEPE_MODEL,
+                ModelManager.createRectangle(2f, 1f, 3f),
                 "PEPE",
                 null,
                 new Vector3(0f, 15f, 0f),
                 2f, 1f, true)
                 .construct();
         sample.body.setRestitution(.8f);
-        sample.body.setFriction(0.5f);
+        sample.body.setFriction(0.0f);
 
         gameObjectsList.add(sample);
         objectInstances.add(sample.getInstance());
@@ -202,7 +213,7 @@ public class WorldManager {
                 GameObject sample = new GameObject.BodyConstructor(
                         ModelManager.createBox(2, 2, 2),
                         "PEPE",
-                        null,
+                        new btBoxShape(new Vector3(1, 1, 1)),
                         new Vector3(10f, i*2, j*2),
                         2f, 1f, true)
                         .construct();
@@ -279,6 +290,9 @@ public class WorldManager {
         broadphase.dispose();
         solver.dispose();
 
+        particleUtils.dispose();
+        modelBatch.dispose();
+
         contactListener.dispose();
     }
 
@@ -329,18 +343,18 @@ public class WorldManager {
             if(!go2.body.isStaticObject())
                 go2.getUsetData().updateHp( calculateMomentum(go1, go2) );
 
-            System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
-            System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
+            //System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
+            //System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
 
             if ( go1.getUsetData().getHp() < 0f && go1.getUsetData().isDestructible()) {
                 go2.body.setLinearVelocity(go2.body.getLinearVelocity().scl(go1.body.getInvMass()));
+                particleUtils.boomEffect(go1.body.getWorldTransform().getTranslation(new Vector3()));
                 removeGameObject(go1);
-
             }
             if ( go2.getUsetData().getHp() < 0f && go2.getUsetData().isDestructible()) {
                 go1.body.setLinearVelocity(go1.body.getLinearVelocity().scl(go2.body.getInvMass()));
+                particleUtils.boomEffect(go2.body.getWorldTransform().getTranslation(new Vector3()));
                 removeGameObject(go2);
-
             }
 
         }

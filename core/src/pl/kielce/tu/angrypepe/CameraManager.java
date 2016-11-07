@@ -22,6 +22,7 @@ public class CameraManager extends PerspectiveCamera{
         super(100, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         this.near = 0.1f;
         this.far = 200f;
+        this.position.set(new Vector3(0f, 0f, 200f));
     }
 
     public void changeFieldOfView() {

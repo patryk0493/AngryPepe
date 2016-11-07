@@ -89,12 +89,6 @@ public class GameObject implements Disposable{
             this.motionState.getWorldTransform(this.getInstance().transform);
     }
 
-    public float getKinematicEnergy() {
-
-        // TODO obliczenie energii kinetycznej dla wektora ruchu
-        return 1f;
-    }
-
     public void destroy() {
         body.dispose();
         instance.model.dispose();
@@ -102,9 +96,10 @@ public class GameObject implements Disposable{
 
     @Override
     public void dispose() {
-        motionState.dispose();
+        /*motionState.dispose();
         body.dispose();
-        instance.model.dispose();
+        body.getMotionState().dispose();
+        instance.model.dispose();*/
     }
 
     static class BodyConstructor implements Disposable {
@@ -136,7 +131,7 @@ public class GameObject implements Disposable{
             if (this.shape == null) {
                 this.shape = createConvexHullShape(this.model, true);
             }
-            this.shape.setMargin(0);
+            this.shape.setMargin(0.00f);
             //this.shape.setLocalScaling(new Vector3(scaleRatio, scaleRatio, scaleRatio));
             //TODO FIX SCALING
             this.shape = new btUniformScalingShape((btConvexShape) this.shape, scaleRatio);
@@ -169,8 +164,8 @@ public class GameObject implements Disposable{
         @Override
         public void dispose () {
             shape.dispose();
-            constructionInfo.dispose();
             instance.model.dispose();
+            constructionInfo.dispose();
         }
 
     }

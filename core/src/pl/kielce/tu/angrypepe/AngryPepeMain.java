@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.*;
 
 public class AngryPepeMain extends ApplicationAdapter {
 
-	public ModelBatch modelBatch;
 
 	public WorldManager worldManager;
 
@@ -29,10 +28,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 		h = Gdx.graphics.getHeight();
 
 		initaliseInputProcessors();
-		modelBatch = new ModelBatch();
+
 
 		worldManager = new WorldManager();
-
 		worldManager.initWorld();
 
 	}
@@ -44,19 +42,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
 		worldManager.renderWorld();
-
-		modelBatch.begin(worldManager.getCam());
-		modelBatch.render(worldManager.getObjectInstances(), worldManager.getEnvironment());
-		modelBatch.end();
 	}
 	
 	@Override
 	public void dispose () {
 
-		modelBatch.dispose();
-
 		worldManager.dispose();
-
 		Gdx.app.log(this.getClass().getName(), "Disposed");
 
 	}
@@ -166,12 +157,14 @@ public class AngryPepeMain extends ApplicationAdapter {
 				float powerX = (startX - screenX) * powerScale;
 				float powerY = (startY - screenY) * powerScale;
 
-				if (Math.abs(powerX) > maxPower) {
+				if (powerX > maxPower)
 					powerX = maxPower;
-				}
-				if (Math.abs(powerY) > maxPower) {
+				if (powerX < -maxPower)
+					powerX = -maxPower;
+				if (powerY > maxPower)
+					powerY = maxPower;
+				if (powerY < -maxPower)
 					powerY = -maxPower;
-				}
 
 				Gdx.app.log("POWER: ", "x: " + powerX + " y:" + powerY);
 				worldManager.applyCentralImpulseToPlayer(new Vector3(powerX, -powerY, 0));
