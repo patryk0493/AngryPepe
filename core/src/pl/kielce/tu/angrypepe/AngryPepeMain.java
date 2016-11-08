@@ -2,7 +2,6 @@ package pl.kielce.tu.angrypepe;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.*;
 
@@ -171,6 +170,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 				worldManager.setPulling(false);
 			}
+			worldManager.getCam().setFollow(true);
 			return false;
 		}
 
@@ -226,6 +226,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 			if (!worldManager.isPulling()) {
 				worldManager.getCam().panCamera(deltaX, deltaY);
+				worldManager.getCam().setFollow(false);
 			}
 
 			return false;

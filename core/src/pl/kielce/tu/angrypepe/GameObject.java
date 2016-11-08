@@ -97,8 +97,8 @@ public class GameObject implements Disposable{
     @Override
     public void dispose() {
         /*motionState.dispose();
-        body.dispose();
         body.getMotionState().dispose();
+        body.dispose();
         instance.model.dispose();*/
     }
 

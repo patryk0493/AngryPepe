@@ -31,6 +31,10 @@ public class Particile {
         billboardParticleBatch.setCamera(camera);
         particleSystem.add(billboardParticleBatch);
         initManager();
+        setBoomEffect();
+    }
+
+    public void setBoomEffect() {
     }
 
     public void boomEffect(Vector3 translation) {
@@ -38,7 +42,7 @@ public class Particile {
         effect.init();
         effect.start();
         effect.translate(translation);
-        effect.scale(1f, 1f, 1f);
+        //effect.scale(5f, 5f, 5f);
         effect.rotate(new Vector3(0, 1, 0), 90);
         particleSystem.add(effect);
     }
