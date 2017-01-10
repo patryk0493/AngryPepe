@@ -222,12 +222,12 @@ public class WorldManager {
         gameObjectsList.add(rectangleGameObject);
         gameObjectsList.add(cylinderGameObject);
         //gameObjectsList.add(pepe1GameObject);
-        gameObjectsList.add(pepe2GameObject);
+        //gameObjectsList.add(pepe2GameObject); //TODO ten obiekt zwraca lampe
         //gameObjectsList.add(owlMGameObject);
         gameObjectsList.add(owlSGameObject);
         //gameObjectsList.add(enviromentGameObject);
         gameObjectsList.add(streeLampGameObject);
-        //gameObjectsList.add(woodGameObject);
+        gameObjectsList.add(woodGameObject);
 
         for (GameObject go : gameObjectsList) {
             objectInstances.add(go.getInstance());
