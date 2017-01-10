@@ -37,6 +37,13 @@ public class WorldManager {
     private GameObject skylandGameObject;
     private GameObject rectangleGameObject;
     private GameObject cylinderGameObject;
+    private GameObject pepe1GameObject;
+    private GameObject pepe2GameObject;
+    private GameObject owlMGameObject;
+    private GameObject owlSGameObject;
+    private GameObject enviromentGameObject;
+    private GameObject streeLampGameObject;
+    private GameObject woodGameObject;
 
     private GameObject hintGameObject;
 
@@ -123,7 +130,64 @@ public class WorldManager {
                 ModelManager.SKYLAND1_MODEL,
                 "skyland",
                 null,
+                new Vector3(-4f, 7f, 0f),
+                0.f, 1f, true)
+                .construct();
+        //jeśli obiekt ma mase inna niż 0 skaluje  model
+
+        pepe1GameObject = new GameObject.BodyConstructor(
+                ModelManager.POLY_PEPE_1_MODEL,
+                "skyland",
+                null,
                 new Vector3(-2f, 5f, 0f),
+                2f, 1f, true)
+                .construct();
+
+        pepe2GameObject = new GameObject.BodyConstructor(
+                ModelManager.POLY_PEPE_2_MODEL,
+                "skyland",
+                null,
+                new Vector3(-2f, 5f, 0f),
+                2f, 1f, true)
+                .construct();
+
+        owlMGameObject = new GameObject.BodyConstructor(
+                ModelManager.SOWA_M_MODEL,
+                "skyland",
+                null,
+                new Vector3(-2f, 5f, 0f),
+                2f, 1f, true)
+                .construct();
+
+        owlSGameObject = new GameObject.BodyConstructor(
+                ModelManager.SOWA_S_MODEL,
+                "owl S",
+                null,
+                new Vector3(-2f, 5f, 0f),
+                4f, 1.35f, true)
+                .construct();
+
+        enviromentGameObject = new GameObject.BodyConstructor(
+                ModelManager.SRODOWISKO_MODEL,
+                "skyland",
+                null,
+                new Vector3(-2f, -5f, 0f),
+                0f, 1f, false)
+                .construct();
+
+        streeLampGameObject = new GameObject.BodyConstructor(
+                ModelManager.STREET_LAMP_MODEL,
+                "skyland",
+                null,
+                new Vector3(-2f, 5f, 0f),
+                2f, 1f, true)
+                .construct();
+
+        woodGameObject = new GameObject.BodyConstructor(
+                ModelManager.DREWNO_MODEL,
+                "wood",
+                null,
+                new Vector3(-2f, 10f, 0f),
                 2f, 1f, true)
                 .construct();
 
@@ -132,7 +196,7 @@ public class WorldManager {
                 "pepexD",
                 null,
                 new Vector3(0f, 6f, 0f),
-                2f, 1f, true)
+                3f, 1f, true)
                 .construct();
         playerGameObject.setUserData(playerGameObject.getUsetData().setDestructible(false).setName("PEPE"));
 
@@ -153,10 +217,17 @@ public class WorldManager {
         gameObjectsList.add(groundGameObject);
         gameObjectsList.add(sphereGameObject);
         gameObjectsList.add(boxGameObject);
-        gameObjectsList.add(skylandGameObject);
+        //gameObjectsList.add(skylandGameObject);
         gameObjectsList.add(playerGameObject);
         gameObjectsList.add(rectangleGameObject);
         gameObjectsList.add(cylinderGameObject);
+        //gameObjectsList.add(pepe1GameObject);
+        gameObjectsList.add(pepe2GameObject);
+        //gameObjectsList.add(owlMGameObject);
+        gameObjectsList.add(owlSGameObject);
+        //gameObjectsList.add(enviromentGameObject);
+        gameObjectsList.add(streeLampGameObject);
+        //gameObjectsList.add(woodGameObject);
 
         for (GameObject go : gameObjectsList) {
             objectInstances.add(go.getInstance());
@@ -176,7 +247,7 @@ public class WorldManager {
         // 3D
         try {
             // TODO jesli nie dziala znimic parametry
-            world.stepSimulation(Gdx.graphics.getDeltaTime(), 1);
+            world.stepSimulation(Gdx.graphics.getDeltaTime(), 10);
             for (GameObject gameObject : gameObjectsList) {
                 gameObject.getWorldTransform();
             }
@@ -260,7 +331,7 @@ public class WorldManager {
 
     public void removeGameObject(GameObject gameObject) {
 
-        // TODO CZASEM WYWALA BLAD
+        // TODO ZAWSZE WYWALA BLAD
         if (gameObject != null) {
             try {
                 world.removeRigidBody(gameObject.getBody());

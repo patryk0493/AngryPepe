@@ -125,7 +125,7 @@ public class GameObject implements Disposable{
             // INSTANCE
             this.instance = new ModelInstance(model);
             instance.transform.trn(position);
-            this.instance.transform.scl(scaleRatio, scaleRatio,scaleRatio);
+            this.instance.transform.scl(scaleRatio, scaleRatio, scaleRatio);
 
             // SHAPE
             if (this.shape == null) {
@@ -140,7 +140,7 @@ public class GameObject implements Disposable{
             if (mass > 0f)
                 this.shape.calculateLocalInertia(mass, localInertia);
             else
-                localInertia.set(0, 0, 0);
+                this.shape.calculateLocalInertia(mass, localInertia.set(0, 0, 0));
             this.constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, null, this.shape, localInertia);
         }
 

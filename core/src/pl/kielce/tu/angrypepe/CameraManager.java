@@ -39,6 +39,8 @@ public class CameraManager extends PerspectiveCamera{
     public void update(Vector3 playerPos) {
         super.update();
 
+        limitCameraPosition();
+
         switch (currentView) {
             case SIDE:
                 setSideView(playerPos);
@@ -50,6 +52,22 @@ public class CameraManager extends PerspectiveCamera{
                 setFrontView(playerPos);
                 break;
         }
+    }
+
+    public void limitCameraPosition() {
+
+        float yMIN = -1, yMAX= 40;
+        float xMIN = -40, xMAX= 40;
+
+        if (this.position.y > yMAX)
+            this.position.y = yMAX;
+        if (this.position.y < yMIN)
+            this.position.y = yMIN;
+        if (this.position.x > xMAX)
+            this.position.x = xMAX;
+        if (this.position.x < xMIN)
+            this.position.x = xMIN;
+
     }
 
     public void setSideView(Vector3 playerPos) {

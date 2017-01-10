@@ -2,6 +2,8 @@ package pl.kielce.tu.angrypepe;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.*;
 
@@ -17,6 +19,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 	private MyGestureHandler gestureHandler;
 
 
+	BitmapFont font;
+	SpriteBatch batch;
+
 	public float w, h;
 
 
@@ -28,6 +33,8 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		initaliseInputProcessors();
 
+		batch = new SpriteBatch();
+		font = new BitmapFont(Gdx.files.internal("myFont.fnt"));
 
 		worldManager = new WorldManager();
 		worldManager.initWorld();
@@ -39,6 +46,13 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+		batch.begin();
+
+		font.setColor(Color.BLUE);
+
+		font.draw(batch,"0", Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2);
+		batch.end();
 
 		worldManager.renderWorld();
 	}
@@ -96,10 +110,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 		@Override
 		public boolean keyTyped(char character) {
 
-			final float power = 3;
+			final float power = 6;
 
 			if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-				worldManager.applyCentralImpulseToPlayer(new Vector3(0, power * 3, 0));
+				worldManager.applyCentralImpulseToPlayer(new Vector3(0, power * 2, 0));
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.A))
@@ -138,7 +152,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 			Gdx.app.log("LOGGER", worldManager.getObject(screenX, screenY) +"");
 			Gdx.app.log("TOUCH DOWN: ", "x: " + screenX + " y:" + screenY);
 
-			if (worldManager.getObject(screenX, screenY).contains(6)) {
+			if (worldManager.getObject(screenX, screenY).contains(13)) {
 				worldManager.setPulling(true);
 				startX = screenX;
 				startY = screenY;
