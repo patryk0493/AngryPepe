@@ -50,8 +50,8 @@ public class AngryPepeMain extends ApplicationAdapter {
 		batch.begin();
 
 		font.setColor(Color.BLUE);
-
 		font.draw(batch,"0", Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2);
+
 		batch.end();
 
 		worldManager.renderWorld();
@@ -131,6 +131,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 			if(Gdx.input.isKeyPressed(Input.Keys.D)) {
 				worldManager.removeGameObject(worldManager.getBoxGameObject());
+			}
+
+			if(Gdx.input.isKeyPressed(Input.Keys.R)) {
+				worldManager.resetWorld();
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.DPAD_LEFT))

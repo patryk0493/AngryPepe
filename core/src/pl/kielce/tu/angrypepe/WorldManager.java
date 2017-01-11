@@ -34,16 +34,16 @@ public class WorldManager {
     private GameObject groundGameObject;
     private GameObject sphereGameObject;
     private GameObject boxGameObject;
-    private GameObject skylandGameObject;
     private GameObject rectangleGameObject;
     private GameObject cylinderGameObject;
     private GameObject pepe1GameObject;
-    private GameObject pepe2GameObject;
-    private GameObject owlMGameObject;
     private GameObject owlSGameObject;
-    private GameObject enviromentGameObject;
-    private GameObject streeLampGameObject;
+    private GameObject streetLampGameObject;
     private GameObject woodGameObject;
+    private GameObject barrelGameObject;
+    private GameObject woodenBoxGameObject;
+    private GameObject plaszczyznaGameObject;
+    private GameObject treeGameObject;
 
     private GameObject hintGameObject;
 
@@ -86,14 +86,6 @@ public class WorldManager {
 
     public void createGameObjects() {
 
-        groundGameObject = new GameObject.BodyConstructor(
-                ModelManager.GROUND,
-                "ground",
-                null,
-                new Vector3(0f, 0f, 0f),
-                0f, 1, false)
-                .construct();
-
         sphereGameObject = new GameObject.BodyConstructor(
                 ModelManager.createSphere(2),
                 "sphere",
@@ -126,13 +118,6 @@ public class WorldManager {
                 3f, 1f, true)
                 .construct();
 
-        skylandGameObject = new GameObject.BodyConstructor(
-                ModelManager.SKYLAND1_MODEL,
-                "skyland",
-                null,
-                new Vector3(-4f, 7f, 0f),
-                0.f, 1f, true)
-                .construct();
         //jeśli obiekt ma mase inna niż 0 skaluje  model
 
         pepe1GameObject = new GameObject.BodyConstructor(
@@ -140,23 +125,7 @@ public class WorldManager {
                 "skyland",
                 null,
                 new Vector3(-2f, 5f, 0f),
-                2f, 1f, true)
-                .construct();
-
-        pepe2GameObject = new GameObject.BodyConstructor(
-                ModelManager.POLY_PEPE_2_MODEL,
-                "skyland",
-                null,
-                new Vector3(-2f, 5f, 0f),
-                2f, 1f, true)
-                .construct();
-
-        owlMGameObject = new GameObject.BodyConstructor(
-                ModelManager.SOWA_M_MODEL,
-                "skyland",
-                null,
-                new Vector3(-2f, 5f, 0f),
-                2f, 1f, true)
+                10f, 7.5f, true)
                 .construct();
 
         owlSGameObject = new GameObject.BodyConstructor(
@@ -167,15 +136,7 @@ public class WorldManager {
                 4f, 1.35f, true)
                 .construct();
 
-        enviromentGameObject = new GameObject.BodyConstructor(
-                ModelManager.SRODOWISKO_MODEL,
-                "skyland",
-                null,
-                new Vector3(-2f, -5f, 0f),
-                0f, 1f, false)
-                .construct();
-
-        streeLampGameObject = new GameObject.BodyConstructor(
+        streetLampGameObject = new GameObject.BodyConstructor(
                 ModelManager.STREET_LAMP_MODEL,
                 "skyland",
                 null,
@@ -189,6 +150,46 @@ public class WorldManager {
                 null,
                 new Vector3(-2f, 10f, 0f),
                 2f, 1f, true)
+                .construct();
+
+        barrelGameObject = new GameObject.BodyConstructor(
+                ModelManager.OIL_BARREL_MODEL,
+                "barrel",
+                new btCylinderShape(new Vector3(1f, 1f, 3f)),
+                new Vector3(-4f, 10f, 0f),
+                2f, 1f, true)
+                .construct();
+
+        woodenBoxGameObject = new GameObject.BodyConstructor(
+                ModelManager.WOODEN_BOX_MODEL,
+                "woodBox",
+                null,
+                new Vector3(-2f, 5f, 0f),
+                2f, 1.45f, true)
+                .construct();
+
+        plaszczyznaGameObject = new GameObject.BodyConstructor(
+                ModelManager.PLASZCZYZNA_MODEL,
+                "plaszczyzna",
+                null,
+                new Vector3(0f, -0.5f, 0f),
+                0f, 1.5f, true)
+                .construct();
+
+        groundGameObject = new GameObject.BodyConstructor(
+                ModelManager.GROUND,
+                "ground",
+                null,
+                new Vector3(0f, 0f, 0f),
+                0f, 1, false)
+                .construct();
+
+        treeGameObject = new GameObject.BodyConstructor(
+                ModelManager.TREE_MODEL,
+                "TREE",
+                null,
+                new Vector3(-2f, 10f, 0f),
+                3f, 1f, true)
                 .construct();
 
         playerGameObject = new GameObject.BodyConstructor(
@@ -217,17 +218,18 @@ public class WorldManager {
         gameObjectsList.add(groundGameObject);
         gameObjectsList.add(sphereGameObject);
         gameObjectsList.add(boxGameObject);
-        //gameObjectsList.add(skylandGameObject);
         gameObjectsList.add(playerGameObject);
         gameObjectsList.add(rectangleGameObject);
         gameObjectsList.add(cylinderGameObject);
-        //gameObjectsList.add(pepe1GameObject);
-        //gameObjectsList.add(pepe2GameObject); //TODO ten obiekt zwraca lampe
-        //gameObjectsList.add(owlMGameObject);
+        gameObjectsList.add(pepe1GameObject);
         gameObjectsList.add(owlSGameObject);
-        //gameObjectsList.add(enviromentGameObject);
-        gameObjectsList.add(streeLampGameObject);
-        gameObjectsList.add(woodGameObject);
+        //gameObjectsList.add(streetLampGameObject);
+        //gameObjectsList.add(woodGameObject);
+
+        //gameObjectsList.add(woodenBoxGameObject);
+        gameObjectsList.add(plaszczyznaGameObject);
+        gameObjectsList.add(barrelGameObject);
+        //gameObjectsList.add(treeGameObject);
 
         for (GameObject go : gameObjectsList) {
             objectInstances.add(go.getInstance());
@@ -326,7 +328,25 @@ public class WorldManager {
         solver = new btSequentialImpulseConstraintSolver();
         world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
         world.setGravity(gravityVector);
+    }
 
+    public void removeAllGameObjects() {
+
+        /*for (GameObject ob: gameObjectsList) {
+            removeGameObject(ob);
+        }*/
+
+        for (GameObject ob: (ArrayList<GameObject>) gameObjectsList.clone()) {
+            gameObjectsList.remove(ob);
+        }
+
+    }
+
+    public void resetWorld() {
+
+        removeAllGameObjects();
+        Gdx.app.log("RESET", "WORLD");
+        //createGameObjects();
     }
 
     public void removeGameObject(GameObject gameObject) {
@@ -572,14 +592,6 @@ public class WorldManager {
 
     public void setBoxGameObject(GameObject boxGameObject) {
         this.boxGameObject = boxGameObject;
-    }
-
-    public GameObject getSkylandGameObject() {
-        return skylandGameObject;
-    }
-
-    public void setSkylandGameObject(GameObject skylandGameObject) {
-        this.skylandGameObject = skylandGameObject;
     }
 
     public GameObject getRectangleGameObject() {
