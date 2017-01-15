@@ -1,6 +1,7 @@
 package pl.kielce.tu.angrypepe;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -17,9 +18,6 @@ import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSol
 
 import java.util.ArrayList;
 
-/**
- * Created by patryk on 06.11.2016.
- */
 public class WorldManager {
 
     private CameraManager cam;
@@ -63,6 +61,9 @@ public class WorldManager {
 
     private Particile particleUtils;
 
+    Music music = Gdx.audio.newMusic(Gdx.files.internal("Tobi King - Loli Mou.mp3"));
+
+
     public void initWorld() {
 
         modelBatch = new ModelBatch();
@@ -81,7 +82,11 @@ public class WorldManager {
         particleUtils.initBillBoardParticles(cam);
 
         contactListener = new MyContactListener();
-
+        if (!music.isPlaying() ) {
+            music.setVolume(0.5f);
+            music.setLooping(true);
+            music.play();
+        }
     }
 
     public void createGameObjects() {
@@ -140,8 +145,8 @@ public class WorldManager {
                 ModelManager.STREET_LAMP_MODEL,
                 "skyland",
                 null,
-                new Vector3(-2f, 5f, 0f),
-                2f, 1f, true)
+                new Vector3(-2f, 2f, 0f),
+                0f, 1f, false)
                 .construct();
 
         woodGameObject = new GameObject.BodyConstructor(
@@ -188,8 +193,8 @@ public class WorldManager {
                 ModelManager.TREE_MODEL,
                 "TREE",
                 null,
-                new Vector3(-2f, 10f, 0f),
-                3f, 1f, true)
+                new Vector3(-9f, 3.5f, -2f),
+                0f, 1f, false)
                 .construct();
 
         playerGameObject = new GameObject.BodyConstructor(
@@ -221,15 +226,15 @@ public class WorldManager {
         gameObjectsList.add(playerGameObject);
         gameObjectsList.add(rectangleGameObject);
         gameObjectsList.add(cylinderGameObject);
-        gameObjectsList.add(pepe1GameObject);
+        //gameObjectsList.add(pepe1GameObject);
         gameObjectsList.add(owlSGameObject);
-        //gameObjectsList.add(streetLampGameObject);
-        //gameObjectsList.add(woodGameObject);
+        gameObjectsList.add(streetLampGameObject);
+        gameObjectsList.add(woodGameObject);
 
-        //gameObjectsList.add(woodenBoxGameObject);
+        gameObjectsList.add(woodenBoxGameObject);
         gameObjectsList.add(plaszczyznaGameObject);
         gameObjectsList.add(barrelGameObject);
-        //gameObjectsList.add(treeGameObject);
+        gameObjectsList.add(treeGameObject);
 
         for (GameObject go : gameObjectsList) {
             objectInstances.add(go.getInstance());
@@ -332,12 +337,9 @@ public class WorldManager {
 
     public void removeAllGameObjects() {
 
-        /*for (GameObject ob: gameObjectsList) {
-            removeGameObject(ob);
-        }*/
-
         for (GameObject ob: (ArrayList<GameObject>) gameObjectsList.clone()) {
             gameObjectsList.remove(ob);
+            removeGameObject(ob);
         }
 
     }
@@ -345,23 +347,21 @@ public class WorldManager {
     public void resetWorld() {
 
         removeAllGameObjects();
+        world.dispose();
+        setupWorld(new Vector3(0, -9.81f, 0));
+        createGameObjects();
         Gdx.app.log("RESET", "WORLD");
-        //createGameObjects();
     }
 
     public void removeGameObject(GameObject gameObject) {
 
-        // TODO ZAWSZE WYWALA BLAD
         if (gameObject != null) {
             try {
                 world.removeRigidBody(gameObject.getBody());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            // TAK DZIALA LEPIEJ
-            //gameObject.body.dispose();
-            //gameObject.model.dispose();
-            //gameObject.destroy();
+
             gameObjectsList.remove(gameObject);
             objectInstances.remove(gameObject.instance);
         }
@@ -441,11 +441,20 @@ public class WorldManager {
                 go2.body.setLinearVelocity(go2.body.getLinearVelocity().scl(go1.body.getInvMass()));
                 particleUtils.boomEffect(go1.body.getWorldTransform().getTranslation(new Vector3()));
                 removeGameObject(go1);
+
+                Music click = Gdx.audio.newMusic(Gdx.files.internal("Tiny Button Push-SoundBible.com-513260752.mp3"));
+                click.play();
+
+
+
             }
             if ( go2.getUsetData().getHp() < 0f && go2.getUsetData().isDestructible()) {
                 go1.body.setLinearVelocity(go1.body.getLinearVelocity().scl(go2.body.getInvMass()));
                 particleUtils.boomEffect(go2.body.getWorldTransform().getTranslation(new Vector3()));
                 removeGameObject(go2);
+
+                Music click = Gdx.audio.newMusic(Gdx.files.internal("Tiny Button Push-SoundBible.com-513260752.mp3"));
+                click.play();
             }
 
         }

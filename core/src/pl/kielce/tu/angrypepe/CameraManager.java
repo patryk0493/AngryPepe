@@ -10,7 +10,7 @@ public class CameraManager extends PerspectiveCamera{
 
     private float viewAngle = 100;
     private boolean isFollow = true;
-    private float zoom = 1.0f;
+    private float zoom = 0.2f;
     private float initialScale;
     private View currentView = SIDE;
 
@@ -26,7 +26,7 @@ public class CameraManager extends PerspectiveCamera{
     }
 
     public void changeFieldOfView() {
-        this.fieldOfView = 40 + (int)(zoom * 50);
+        this.fieldOfView = 40 + (int)(zoom * 30);
         this.update();
     }
 
@@ -89,7 +89,7 @@ public class CameraManager extends PerspectiveCamera{
             this.position.z = this.position.z + (playerPos.z - this.position.z) * 0.05f;
         }
         if(isFollow)
-        this.lookAt(playerPos);
+            this.lookAt(playerPos);
         this.up.set(new Vector3(0, 1, 0));
         this.update();
     }
@@ -102,7 +102,7 @@ public class CameraManager extends PerspectiveCamera{
         }
         this.lookAt(playerPos);
         if(isFollow)
-        this.up.set(new Vector3(0, 1, 0));
+            this.up.set(new Vector3(0, 1, 0));
         this.update();
     }
 
