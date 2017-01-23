@@ -15,7 +15,9 @@ public class CameraManager extends PerspectiveCamera{
     private View currentView = SIDE;
 
     enum View {
-        SIDE, TOP, FRONT
+        SIDE,
+        TOP,
+        FRONT
     }
 
     public CameraManager () {
@@ -40,7 +42,6 @@ public class CameraManager extends PerspectiveCamera{
         super.update();
 
         limitCameraPosition();
-
         switch (currentView) {
             case SIDE:
                 setSideView(playerPos);
@@ -67,7 +68,6 @@ public class CameraManager extends PerspectiveCamera{
             this.position.x = xMAX;
         if (this.position.x < xMIN)
             this.position.x = xMIN;
-
     }
 
     public void setSideView(Vector3 playerPos) {
@@ -82,7 +82,6 @@ public class CameraManager extends PerspectiveCamera{
     }
 
     public void setTopCameraView(Vector3 playerPos) {
-        //this.position.set(0f, 20f, 0f);
         if(isFollow) {
             this.position.x = this.position.x + (playerPos.x - this.position.x) * 0.05f;
             this.position.y = this.position.y + 1.2f + (playerPos.y - this.position.y) * 0.05f;
@@ -105,7 +104,6 @@ public class CameraManager extends PerspectiveCamera{
             this.up.set(new Vector3(0, 1, 0));
         this.update();
     }
-
 
 
     public void calculateZoom(float initialDistance, float distance) {
@@ -133,10 +131,6 @@ public class CameraManager extends PerspectiveCamera{
         this.viewportWidth = width;
         this.viewportHeight = height;
         this.update(true);
-    }
-
-    public void followPlayer() {
-
     }
 
     public float getViewAngle() {

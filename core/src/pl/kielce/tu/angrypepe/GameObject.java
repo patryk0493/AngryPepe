@@ -10,9 +10,6 @@ import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
 import com.badlogic.gdx.utils.Disposable;
 
-/**
- * Created by patryk on 30.10.2016.
- */
 public class GameObject implements Disposable{
 
 
@@ -37,7 +34,7 @@ public class GameObject implements Disposable{
         this.scaleRatio = scaleRatio;
         this.instance = instance;
         body = new btRigidBody(constructionInfo);
-        body.setActivationState(Collision.DISABLE_DEACTIVATION); // Naprawia poruszanie obiektu,gdy wektor ruchuchu = 0
+        body.setActivationState(Collision.DISABLE_DEACTIVATION); // poruszanie obiektu,gdy wektor ruchuchu = 0
         body.setRestitution(0.2f);
         if (createMotionState) {
             motionState = new btDefaultMotionState(this.instance.transform);
@@ -96,10 +93,10 @@ public class GameObject implements Disposable{
 
     @Override
     public void dispose() {
-        /*motionState.dispose();
+        motionState.dispose();
         body.getMotionState().dispose();
         body.dispose();
-        instance.model.dispose();*/
+        instance.model.dispose();
     }
 
     static class BodyConstructor implements Disposable {

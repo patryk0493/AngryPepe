@@ -1,8 +1,5 @@
 package pl.kielce.tu.angrypepe;
 
-/**
- * Created by patryk on 03.11.2016.
- */
 public class CustomObjectData {
 
     private String name;
@@ -37,8 +34,6 @@ public class CustomObjectData {
                 ", isDestructible=" + isDestructible +
                 '}';
     }
-
-    public CustomObjectData() { }
 
     public String getName() {
         return name;

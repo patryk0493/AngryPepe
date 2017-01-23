@@ -34,7 +34,6 @@ public class WorldManager {
     private GameObject boxGameObject;
     private GameObject rectangleGameObject;
     private GameObject cylinderGameObject;
-    private GameObject pepe1GameObject;
     private GameObject owlSGameObject;
     private GameObject streetLampGameObject;
     private GameObject woodGameObject;
@@ -43,15 +42,12 @@ public class WorldManager {
     private GameObject plaszczyznaGameObject;
     private GameObject treeGameObject;
 
-    private GameObject hintGameObject;
-
     private MyContactListener contactListener;
 
     private float power;
 
     private ArrayList<ModelInstance> objectInstances;
     private ArrayList<GameObject> gameObjectsList = new ArrayList<GameObject>();
-    private ArrayList<GameObject> hintsObjectList = new ArrayList<GameObject>();
 
     private btDefaultCollisionConfiguration collisionConfiguration;
     private btCollisionDispatcher dispatcher;
@@ -60,8 +56,6 @@ public class WorldManager {
     private btDiscreteDynamicsWorld world;
 
     private Particile particleUtils;
-
-    Music music = Gdx.audio.newMusic(Gdx.files.internal("Tobi King - Loli Mou.mp3"));
 
 
     public void initWorld() {
@@ -82,11 +76,6 @@ public class WorldManager {
         particleUtils.initBillBoardParticles(cam);
 
         contactListener = new MyContactListener();
-        if (!music.isPlaying() ) {
-            music.setVolume(0.5f);
-            music.setLooping(true);
-            music.play();
-        }
     }
 
     public void createGameObjects() {
@@ -124,14 +113,6 @@ public class WorldManager {
                 .construct();
 
         //jeśli obiekt ma mase inna niż 0 skaluje  model
-
-        pepe1GameObject = new GameObject.BodyConstructor(
-                ModelManager.POLY_PEPE_1_MODEL,
-                "skyland",
-                null,
-                new Vector3(-2f, 5f, 0f),
-                10f, 7.5f, true)
-                .construct();
 
         owlSGameObject = new GameObject.BodyConstructor(
                 ModelManager.SOWA_S_MODEL,
@@ -206,27 +187,12 @@ public class WorldManager {
                 .construct();
         playerGameObject.setUserData(playerGameObject.getUsetData().setDestructible(false).setName("PEPE"));
 
-
-        hintGameObject = new GameObject.BodyConstructor(
-                ModelManager.createSphere(1),
-                "hint",
-                new btSphereShape(0.5f),
-                new Vector3(0f, 0f, 0f),
-                1f, 1, true)
-                .construct();
-        hintGameObject.body.setCollisionFlags( playerGameObject.body.getCollisionFlags()
-                | btCollisionObject.CollisionFlags.CF_NO_CONTACT_RESPONSE);
-
-        for (int i = 0; i < 10; i++)
-            hintsObjectList.add(hintGameObject);
-
         gameObjectsList.add(groundGameObject);
         gameObjectsList.add(sphereGameObject);
         gameObjectsList.add(boxGameObject);
         gameObjectsList.add(playerGameObject);
         gameObjectsList.add(rectangleGameObject);
         gameObjectsList.add(cylinderGameObject);
-        //gameObjectsList.add(pepe1GameObject);
         gameObjectsList.add(owlSGameObject);
         gameObjectsList.add(streetLampGameObject);
         gameObjectsList.add(woodGameObject);
@@ -249,11 +215,8 @@ public class WorldManager {
 
         cam.changeFieldOfView();
         cam.update(playerGameObject.instance.transform.getTranslation(new Vector3().Zero));
-        cam.followPlayer();
 
-        // 3D
         try {
-            // TODO jesli nie dziala znimic parametry
             world.stepSimulation(Gdx.graphics.getDeltaTime(), 10);
             for (GameObject gameObject : gameObjectsList) {
                 gameObject.getWorldTransform();
@@ -268,7 +231,7 @@ public class WorldManager {
         modelBatch.end();
     }
 
-    public void createRandomGameObject() {
+    public void createGameObject() {
         GameObject sample = new GameObject.BodyConstructor(
                 ModelManager.createRectangle(2f, 1f, 3f),
                 "PEPE",
@@ -277,7 +240,7 @@ public class WorldManager {
                 2f, 1f, true)
                 .construct();
         sample.body.setRestitution(.8f);
-        sample.body.setFriction(0.0f);
+        sample.body.setFriction(0.2f);
 
         gameObjectsList.add(sample);
         objectInstances.add(sample.getInstance());
@@ -317,16 +280,13 @@ public class WorldManager {
     }
 
     public void prepareEnviroment() {
-
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         environment.add(new DirectionalLight().set(Color.WHITE, new Vector3(-0.5f, -1f , -0.5f)));
         environment.add(new DirectionalLight().set(Color.WHITE, new Vector3(0.5f, -1f , -0.5f)));
-
     }
 
     public void setupWorld(Vector3 gravityVector) {
-
         collisionConfiguration = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfiguration);
         broadphase = new btDbvtBroadphase();
@@ -336,16 +296,13 @@ public class WorldManager {
     }
 
     public void removeAllGameObjects() {
-
         for (GameObject ob: (ArrayList<GameObject>) gameObjectsList.clone()) {
             gameObjectsList.remove(ob);
             removeGameObject(ob);
         }
-
     }
 
     public void resetWorld() {
-
         removeAllGameObjects();
         world.dispose();
         setupWorld(new Vector3(0, -9.81f, 0));
@@ -354,7 +311,6 @@ public class WorldManager {
     }
 
     public void removeGameObject(GameObject gameObject) {
-
         if (gameObject != null) {
             try {
                 world.removeRigidBody(gameObject.getBody());
@@ -434,23 +390,23 @@ public class WorldManager {
             if(!go2.body.isStaticObject())
                 go2.getUsetData().updateHp( calculateMomentum(go1, go2) );
 
-            //System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
-            //System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
+            System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
+            System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
 
             if ( go1.getUsetData().getHp() < 0f && go1.getUsetData().isDestructible()) {
                 go2.body.setLinearVelocity(go2.body.getLinearVelocity().scl(go1.body.getInvMass()));
-                particleUtils.boomEffect(go1.body.getWorldTransform().getTranslation(new Vector3()));
+                particleUtils.boomEffect(go1.body.getWorldTransform().getTranslation(new Vector3()),
+                        calculateMomentum(go2, go1)/4);
                 removeGameObject(go1);
 
                 Music click = Gdx.audio.newMusic(Gdx.files.internal("Tiny Button Push-SoundBible.com-513260752.mp3"));
                 click.play();
 
-
-
             }
             if ( go2.getUsetData().getHp() < 0f && go2.getUsetData().isDestructible()) {
                 go1.body.setLinearVelocity(go1.body.getLinearVelocity().scl(go2.body.getInvMass()));
-                particleUtils.boomEffect(go2.body.getWorldTransform().getTranslation(new Vector3()));
+                particleUtils.boomEffect(go2.body.getWorldTransform().getTranslation(new Vector3()),
+                        calculateMomentum(go2, go1)/4);
                 removeGameObject(go2);
 
                 Music click = Gdx.audio.newMusic(Gdx.files.internal("Tiny Button Push-SoundBible.com-513260752.mp3"));
@@ -513,14 +469,6 @@ public class WorldManager {
 
     public void setGameObjectsList(ArrayList<GameObject> gameObjectsList) {
         this.gameObjectsList = gameObjectsList;
-    }
-
-    public ArrayList<GameObject> getHintsObjectList() {
-        return hintsObjectList;
-    }
-
-    public void setHintsObjectList(ArrayList<GameObject> hintsObjectList) {
-        this.hintsObjectList = hintsObjectList;
     }
 
     public btDefaultCollisionConfiguration getCollisionConfiguration() {
@@ -617,14 +565,6 @@ public class WorldManager {
 
     public void setCylinderGameObject(GameObject cylinderGameObject) {
         this.cylinderGameObject = cylinderGameObject;
-    }
-
-    public GameObject getHintGameObject() {
-        return hintGameObject;
-    }
-
-    public void setHintGameObject(GameObject hintGameObject) {
-        this.hintGameObject = hintGameObject;
     }
 
     public float getPower() {

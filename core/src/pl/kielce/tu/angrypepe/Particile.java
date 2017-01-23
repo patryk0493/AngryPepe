@@ -8,9 +8,6 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
 import com.badlogic.gdx.math.Vector3;
 
-/**
- * Created by patryk on 06.11.2016.
- */
 public class Particile {
 
     public AssetManager particleManager;
@@ -37,12 +34,12 @@ public class Particile {
     public void setBoomEffect() {
     }
 
-    public void boomEffect(Vector3 translation) {
+    public void boomEffect(Vector3 translation, float scale) {
         ParticleEffect effect = particleManager.get(ModelManager.PARTICLE, ParticleEffect.class).copy();
         effect.init();
         effect.start();
         effect.translate(translation);
-        //effect.scale(5f, 5f, 5f);
+        effect.scale(scale, scale, scale);
         effect.rotate(new Vector3(0, 1, 0), 90);
         particleSystem.add(effect);
     }

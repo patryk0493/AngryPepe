@@ -11,19 +11,11 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 
 	public WorldManager worldManager;
-
-	boolean isGameView = false;
-
 	private InputMultiplexer inputMultiplexer;
 	private MyInputProcessor inputProcessor;
 	private MyGestureHandler gestureHandler;
 
-
-	BitmapFont font;
-	SpriteBatch batch;
-
 	public float w, h;
-
 
 	@Override
 	public void create () {
@@ -32,9 +24,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 		h = Gdx.graphics.getHeight();
 
 		initaliseInputProcessors();
-
-		batch = new SpriteBatch();
-		font = new BitmapFont(Gdx.files.internal("myFont.fnt"));
 
 		worldManager = new WorldManager();
 		worldManager.initWorld();
@@ -47,22 +36,13 @@ public class AngryPepeMain extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-		batch.begin();
-
-		font.setColor(Color.BLUE);
-		font.draw(batch,"0", Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2);
-
-		batch.end();
-
 		worldManager.renderWorld();
 	}
 	
 	@Override
 	public void dispose () {
-
 		worldManager.dispose();
 		Gdx.app.log(this.getClass().getName(), "Disposed");
-
 	}
 
 
@@ -117,7 +97,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.A))
-				worldManager.createRandomGameObject();
+				worldManager.createGameObject();
 
 			if(Gdx.input.isKeyPressed(Input.Keys.P)) {
 				worldManager.getCam().setCurrentView(CameraManager.View.SIDE);
@@ -269,7 +249,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 		public void pinchStop() {
 
 		}
-
 	}
 
 
@@ -282,14 +261,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	@Override
 	public void pause() {
-
-
 	}
 
 	@Override
 	public void resume() {
-
-
 	}
 
 }
