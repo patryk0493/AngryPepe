@@ -18,17 +18,38 @@ import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSol
 
 import java.util.ArrayList;
 
+/**
+ * Klasa reprezentująca świat gry.
+ * @author Patryk Eliasz, Karol Rębiś */
 public class WorldManager {
 
-    private CameraManager cam;
-    private Environment environment;
-    private Vector3 position = new Vector3();
-    private boolean isPulling = false;
+    /**
+     * Kamera.
+     */
+    public CameraManager cam;
+    /**
+     * Środowisko
+     */
+    public Environment environment;
+    /**
+     * Pozycja, wektor 0,0,0
+     */
+    public Vector3 position = new Vector3();
+    /**
+     * Czy obiekt gracza jest ciągnięty.
+     */
+    public boolean isPulling = false;
 
     private ModelInstance skyInstance;
+    /**
+     * Środowisko modeli.
+     */
     public ModelBatch modelBatch;
 
-    private GameObject playerGameObject;
+    /**
+     * Obiekt gracza.
+     */
+    public GameObject playerGameObject;
     private GameObject groundGameObject;
     private GameObject sphereGameObject;
     private GameObject boxGameObject;
@@ -42,12 +63,19 @@ public class WorldManager {
     private GameObject plaszczyznaGameObject;
     private GameObject treeGameObject;
 
-    private MyContactListener contactListener;
+    /**
+     * Obserwartor zderzenia obiektów.
+     */
+    public MyContactListener contactListener;
 
-    private float power;
-
-    private ArrayList<ModelInstance> objectInstances;
-    private ArrayList<GameObject> gameObjectsList = new ArrayList<GameObject>();
+    /**
+     * Lista instancji obiektów.
+     */
+    public ArrayList<ModelInstance> objectInstances;
+    /**
+     * Lista instancji obiektów gry.
+     */
+    public ArrayList<GameObject> gameObjectsList = new ArrayList<GameObject>();
 
     private btDefaultCollisionConfiguration collisionConfiguration;
     private btCollisionDispatcher dispatcher;
@@ -55,9 +83,15 @@ public class WorldManager {
     private btSequentialImpulseConstraintSolver solver;
     private btDiscreteDynamicsWorld world;
 
-    private Particile particleUtils;
+    /**
+     * Obiekt klasy {@link Particile} obsługujący cząsteczki
+     */
+    public Particile particleUtils;
 
 
+    /**
+     * Inicjalizacja świata gry.
+     */
     public void initWorld() {
 
         modelBatch = new ModelBatch();
@@ -78,6 +112,9 @@ public class WorldManager {
         contactListener = new MyContactListener();
     }
 
+    /**
+     * Utworzenia obiektów gry, dodanie ich do świata oraz zapisanie ich ich w listach.
+     */
     public void createGameObjects() {
 
         sphereGameObject = new GameObject.BodyConstructor(
@@ -211,6 +248,9 @@ public class WorldManager {
 
     }
 
+    /**
+     * Render świta gry.
+     */
     public void renderWorld() {
 
         cam.changeFieldOfView();
@@ -227,10 +267,13 @@ public class WorldManager {
 
         modelBatch.begin(cam);
         modelBatch.render(objectInstances, environment);
-        modelBatch.render(particleUtils.updateAndDraw(), environment);
+        modelBatch.render(particleUtils.updateParticile(), environment);
         modelBatch.end();
     }
 
+    /**
+     * Utworzenie obiektu gry - .
+     */
     public void createGameObject() {
         GameObject sample = new GameObject.BodyConstructor(
                 ModelManager.createRectangle(2f, 1f, 3f),
@@ -248,6 +291,9 @@ public class WorldManager {
 
     }
 
+    /**
+     * Stworzenie ściany z sześcianów.
+     */
     public void createWall() {
         for (int i = 0; i< 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -266,6 +312,13 @@ public class WorldManager {
         }
     }
 
+    /**
+     * Pobieranie listy obiektów znajdujących się wzdłóż promienia.
+     *
+     * @param screenX współrzędna X
+     * @param screenY współrzędna Y
+     * @return lista obiektów które "przeszył" promień
+     */
     public ArrayList<Integer> getObject (int screenX, int screenY) {
         Ray ray = cam.getPickRay(screenX, screenY);
         ArrayList<Integer> objectIdList = new ArrayList<Integer>();
@@ -279,6 +332,9 @@ public class WorldManager {
         return objectIdList;
     }
 
+    /**
+     * Przygotowanie środowiska, dodanie świateł.
+     */
     public void prepareEnviroment() {
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
@@ -286,6 +342,11 @@ public class WorldManager {
         environment.add(new DirectionalLight().set(Color.WHITE, new Vector3(0.5f, -1f , -0.5f)));
     }
 
+    /**
+     * Przygotowanie fizyki świata gry.
+     *
+     * @param gravityVector Wektor grawitacji.
+     */
     public void setupWorld(Vector3 gravityVector) {
         collisionConfiguration = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfiguration);
@@ -295,6 +356,9 @@ public class WorldManager {
         world.setGravity(gravityVector);
     }
 
+    /**
+     * Usunięcie wszystkich obiektów ze świata gry.
+     */
     public void removeAllGameObjects() {
         for (GameObject ob: (ArrayList<GameObject>) gameObjectsList.clone()) {
             gameObjectsList.remove(ob);
@@ -302,6 +366,9 @@ public class WorldManager {
         }
     }
 
+    /**
+     * Zresetowanie świata gry.
+     */
     public void resetWorld() {
         removeAllGameObjects();
         world.dispose();
@@ -310,25 +377,39 @@ public class WorldManager {
         Gdx.app.log("RESET", "WORLD");
     }
 
-    public void removeGameObject(GameObject gameObject) {
+    /**
+     * Usunięcie pojedyńczego obiektu ze świata gry
+     *
+     * @param gameObject obiekt do usunięcia
+     * @return czy udało się usunąć
+     */
+    public boolean removeGameObject(GameObject gameObject) {
         if (gameObject != null) {
             try {
                 world.removeRigidBody(gameObject.getBody());
             } catch (Exception e) {
                 e.printStackTrace();
+                return false;
             }
 
             gameObjectsList.remove(gameObject);
             objectInstances.remove(gameObject.instance);
         }
+        return true;
     }
 
+    /**
+     * "Uderzenie" obiektu gracza.
+     *
+     * @param vector3 wektor
+     */
     public void applyCentralImpulseToPlayer(Vector3 vector3) {
-
         playerGameObject.body.applyCentralImpulse( vector3 );
-
     }
 
+    /**
+     * Czyszczenie pamięci.
+     */
     public void dispose() {
 
         world.dispose();
@@ -343,38 +424,72 @@ public class WorldManager {
         contactListener.dispose();
     }
 
+    /**
+     * Pobranie obiektu kamery.
+     *
+     * @return kamera
+     */
     public CameraManager getCam() {
         return cam;
     }
 
-    public void setCam(CameraManager cam) {
-        this.cam = cam;
-    }
-
+    /**
+     * Pobranie instancji środowiska gry.
+     *
+     * @return środowisko gry
+     */
     public Environment getEnvironment() {
         return environment;
     }
 
+    /**
+     * Ustawienie środowiska gry
+     *
+     * @param environment środowisko gry
+     */
     public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
 
+    /**
+     * Pobranie wektora
+     *
+     * @return wektor
+     */
     public Vector3 getPosition() {
         return position;
     }
 
+    /**
+     * Ustawienie wektora
+     *
+     * @param position wektor
+     */
     public void setPosition(Vector3 position) {
         this.position = position;
     }
 
+    /**
+     * Czy obiekty jest "ciągnięty"?
+     *
+     * @return wartosc logiczna
+     */
     public boolean isPulling() {
         return isPulling;
     }
 
+    /**
+     * Ustawienie czy jest "ciągnięty"
+     *
+     * @param pulling wartość logiczna
+     */
     public void setPulling(boolean pulling) {
         isPulling = pulling;
     }
 
+    /**
+     * Klasa implementująca zdarzenie zderzenia obiektów gry
+     */
     class MyContactListener extends ContactListener {
         @Override
         public void onContactStarted (btCollisionObject colObj0, btCollisionObject colObj1) {
@@ -415,6 +530,13 @@ public class WorldManager {
 
         }
 
+        /**
+         * Obiczenie pędu między obiektami
+         *
+         * @param o1 obiekt 1
+         * @param o2 obiekt 2
+         * @return pęd
+         */
         public float calculateMomentum(GameObject o1, GameObject o2) {
             float momentum;
             momentum = getMaxVelecity(o1.body.getLinearVelocity()) * o1.getBody().getInvMass() +
@@ -422,6 +544,12 @@ public class WorldManager {
             return momentum;
         }
 
+        /**
+         * Pobranie obiektu gry na podstawie jego ID
+         *
+         * @param id identyfikator obiektu
+         * @return obiekt gry
+         */
         public GameObject getCollistionObject ( int id ) {
             for ( GameObject gameObject : gameObjectsList ) {
                 if (id == gameObject.getObjectId())
@@ -430,6 +558,12 @@ public class WorldManager {
             return null;
         }
 
+        /**
+         * Pobranie maksymalnej wartości prędkości z wektora przemieszczenia
+         *
+         * @param vector wektor
+         * @return maksymalna prędkość
+         */
         public float getMaxVelecity(Vector3 vector) {
             float maxVelocity = 0;
             if (  Math.abs(vector.x) > maxVelocity )
@@ -447,131 +581,32 @@ public class WorldManager {
         }
     }
 
-    public MyContactListener getContactListener() {
-        return contactListener;
-    }
-
-    public void setContactListener(MyContactListener contactListener) {
-        this.contactListener = contactListener;
-    }
-
-    public ArrayList<ModelInstance> getObjectInstances() {
-        return objectInstances;
-    }
-
-    public void setObjectInstances(ArrayList<ModelInstance> objectInstances) {
-        this.objectInstances = objectInstances;
-    }
-
-    public ArrayList<GameObject> getGameObjectsList() {
-        return gameObjectsList;
-    }
-
-    public void setGameObjectsList(ArrayList<GameObject> gameObjectsList) {
-        this.gameObjectsList = gameObjectsList;
-    }
-
-    public btDefaultCollisionConfiguration getCollisionConfiguration() {
-        return collisionConfiguration;
-    }
-
-    public void setCollisionConfiguration(btDefaultCollisionConfiguration collisionConfiguration) {
-        this.collisionConfiguration = collisionConfiguration;
-    }
-
+    /**
+     * Pobiera dyspozytora kolizji.
+     *
+     * @return dyspozytor
+     */
     public btCollisionDispatcher getDispatcher() {
         return dispatcher;
     }
 
+    /**
+     * Ustawia dyspozytora kolizji.
+     *
+     * @param dispatcher dyspozytor
+     */
     public void setDispatcher(btCollisionDispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
 
-    public btDbvtBroadphase getBroadphase() {
-        return broadphase;
-    }
-
-    public void setBroadphase(btDbvtBroadphase broadphase) {
-        this.broadphase = broadphase;
-    }
-
-    public btSequentialImpulseConstraintSolver getSolver() {
-        return solver;
-    }
-
-    public void setSolver(btSequentialImpulseConstraintSolver solver) {
-        this.solver = solver;
-    }
-
-    public btDiscreteDynamicsWorld getWorld() {
-        return world;
-    }
-
-    public void setWorld(btDiscreteDynamicsWorld world) {
-        this.world = world;
-    }
-
-    public ModelInstance getSkyInstance() {
-        return skyInstance;
-    }
-
-    public void setSkyInstance(ModelInstance skyInstance) {
-        this.skyInstance = skyInstance;
-    }
-
-    public GameObject getPlayerGameObject() {
-        return playerGameObject;
-    }
-
-    public void setPlayerGameObject(GameObject playerGameObject) {
-        this.playerGameObject = playerGameObject;
-    }
-
-    public GameObject getGroundGameObject() {
-        return groundGameObject;
-    }
-
-    public void setGroundGameObject(GameObject groundGameObject) {
-        this.groundGameObject = groundGameObject;
-    }
-
-    public GameObject getSphereGameObject() {
-        return sphereGameObject;
-    }
-
-    public void setSphereGameObject(GameObject sphereGameObject) {
-        this.sphereGameObject = sphereGameObject;
-    }
-
+    /**
+     * Pobiera obiekt gry - pudełko.
+     *
+     * @return obiekt gry - pudełko
+     */
     public GameObject getBoxGameObject() {
         return boxGameObject;
     }
 
-    public void setBoxGameObject(GameObject boxGameObject) {
-        this.boxGameObject = boxGameObject;
-    }
 
-    public GameObject getRectangleGameObject() {
-        return rectangleGameObject;
-    }
-
-    public void setRectangleGameObject(GameObject rectangleGameObject) {
-        this.rectangleGameObject = rectangleGameObject;
-    }
-
-    public GameObject getCylinderGameObject() {
-        return cylinderGameObject;
-    }
-
-    public void setCylinderGameObject(GameObject cylinderGameObject) {
-        this.cylinderGameObject = cylinderGameObject;
-    }
-
-    public float getPower() {
-        return power;
-    }
-
-    public void setPower(float power) {
-        this.power = power;
-    }
 }

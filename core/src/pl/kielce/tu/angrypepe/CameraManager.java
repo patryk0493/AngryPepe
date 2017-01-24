@@ -6,20 +6,53 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import static pl.kielce.tu.angrypepe.CameraManager.View.SIDE;
 
+/**
+ * Obiekt kamery perspektywicznej.
+ * @author Patryk Eliasz, Karol Rębiś */
 public class CameraManager extends PerspectiveCamera{
 
-    private float viewAngle = 100;
-    private boolean isFollow = true;
-    private float zoom = 0.2f;
-    private float initialScale;
-    private View currentView = SIDE;
+    /**
+     * Kąt widzenia.
+     */
+    public float viewAngle = 100;
+    /**
+     * Czy kamera podąża za obiektem gry.
+     */
+    public boolean isFollow = true;
+    /**
+     * Zoom.
+     */
+    public float zoom = 0.2f;
+    /**
+     * Skala.
+     */
+    public float initialScale;
+    /**
+     * Obecny widok - domyślnie z boku.
+     */
+    public View currentView = SIDE;
 
-    enum View {
+    /**
+     * Typ wyliczeniowy dostępnych widoków.
+     */
+    public enum View {
+        /**
+         * Widok z boku.
+         */
         SIDE,
+        /**
+         * Widok z góry.
+         */
         TOP,
+        /**
+         * Widok z góry.
+         */
         FRONT
     }
 
+    /**
+     * Podstawowy konstruktor klasy CameraManager.
+     */
     public CameraManager () {
         super(100, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         this.near = 0.1f;
@@ -27,17 +60,31 @@ public class CameraManager extends PerspectiveCamera{
         this.position.set(new Vector3(0f, 0f, 200f));
     }
 
+    /**
+     * Zmiana pola widzenia w stopniach.
+     */
     public void changeFieldOfView() {
         this.fieldOfView = 40 + (int)(zoom * 30);
         this.update();
     }
 
+    /**
+     * Obsługa przemieszczenia kamery.
+     *
+     * @param x długość wektora w osi X
+     * @param y długość wektora w osi Y
+     */
     public void panCamera(float x, float y) {
         final float scalar = 0.2f;
         Vector3 transVec = new Vector3(-x * zoom * scalar, y * zoom * scalar, 0);
         this.translate(transVec);
     }
 
+    /**
+     * Aktualizowanie widoku.
+     *
+     * @param playerPos wektor zawierający pozycję obiektu gracza
+     */
     public void update(Vector3 playerPos) {
         super.update();
 
@@ -55,6 +102,9 @@ public class CameraManager extends PerspectiveCamera{
         }
     }
 
+    /**
+     * Ograniczenie przemieszczenia kamery w osi Y i X.
+     */
     public void limitCameraPosition() {
 
         float yMIN = -1, yMAX= 40;
@@ -70,6 +120,11 @@ public class CameraManager extends PerspectiveCamera{
             this.position.x = xMIN;
     }
 
+    /**
+     * Ustawienie widoku z boku.
+     *
+     * @param playerPos wektor zawierający pozycję obiektu gracza
+     */
     public void setSideView(Vector3 playerPos) {
         if(isFollow) {
             this.position.x = this.position.x + (playerPos.x - this.position.x) * 0.05f;
@@ -81,18 +136,28 @@ public class CameraManager extends PerspectiveCamera{
         this.update();
     }
 
+    /**
+     * Ustawienie widoku z góry.
+     *
+     * @param playerPos wektor zawierający pozycję obiektu gracza
+     */
     public void setTopCameraView(Vector3 playerPos) {
         if(isFollow) {
             this.position.x = this.position.x + (playerPos.x - this.position.x) * 0.05f;
             this.position.y = this.position.y + 1.2f + (playerPos.y - this.position.y) * 0.05f;
             this.position.z = this.position.z + (playerPos.z - this.position.z) * 0.05f;
-        }
-        if(isFollow)
             this.lookAt(playerPos);
+        }
+
         this.up.set(new Vector3(0, 1, 0));
         this.update();
     }
 
+    /**
+     * Ustawienie widoku z przodu,
+     *
+     * @param playerPos wektor zawierający pozycję obiektu gracza
+     */
     public void setFrontView(Vector3 playerPos) {
         if(isFollow) {
             this.position.x = this.position.x - 1.2f + (playerPos.x - this.position.x) * 0.05f;
@@ -106,11 +171,22 @@ public class CameraManager extends PerspectiveCamera{
     }
 
 
+    /**
+     * Obliczenie nowej wartości powiększenia
+     *
+     * @param initialDistance wstępna wartość odległości
+     * @param distance        końcowa wartość odległości
+     */
     public void calculateZoom(float initialDistance, float distance) {
         float ratio = initialDistance / distance;
         zoom = MathUtils.clamp(initialScale * ratio, 0.1f, 1f);
     }
 
+    /**
+     * Zmiana wartości powiększenia
+     *
+     * @param amount wartość
+     */
     public void changeZoom(int amount) {
         //Zoom out
         if (amount > 0 && zoom < 1) {
@@ -123,46 +199,68 @@ public class CameraManager extends PerspectiveCamera{
         }
     }
 
+    /**
+     * Aktualizacja powiększenia.
+     */
     public void updateInitialScale() {
         initialScale = zoom;
     }
 
+    /**
+     * Aktualizacja widoku.
+     *
+     * @param width  Szerokość
+     * @param height Wysokość
+     */
     public void updateViewport(int width, int height) {
         this.viewportWidth = width;
         this.viewportHeight = height;
         this.update(true);
     }
 
+    /**
+     * Pobranie kąta widzenia.
+     *
+     * @return kąt widzenia
+     */
     public float getViewAngle() {
         return viewAngle;
     }
 
+    /**
+     * Ustawienie kąta widzenia
+     *
+     * @param viewAngle kąt widzenia
+     */
     public void setViewAngle(float viewAngle) {
         this.viewAngle = viewAngle;
     }
 
+    /**
+     * Czy podąża za obiektem?
+     *
+     * @return wartość logiczna
+     */
     public boolean isFollow() {
         return isFollow;
     }
 
+    /**
+     * Uustawienie podążania za obiektem.
+     *
+     * @param follow czy podąża
+     */
     public void setFollow(boolean follow) {
         isFollow = follow;
     }
 
-    public float getZoom() {
-        return zoom;
-    }
-
-    public void setZoom(float zoom) {
-        this.zoom = zoom;
-    }
-
+    /**
+     * Ustawienie widoku
+     *
+     * @param currentView wartość typu View
+     */
     public void setCurrentView(View currentView) {
         this.currentView = currentView;
-    }
-
-    public View getCurrentView() {
-        return this.currentView;
     }
 
 }

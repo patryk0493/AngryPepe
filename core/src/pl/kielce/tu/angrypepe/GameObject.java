@@ -10,23 +10,69 @@ import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
 import com.badlogic.gdx.utils.Disposable;
 
+/**
+ * Klasa reprezentująca obiekt gry.
+ * @author Patryk Eliasz, Karol Rębiś */
 public class GameObject implements Disposable{
 
 
+    /**
+     * Ciało obiektu.
+     */
     public btRigidBody body;
+    /**
+     * Model obiektu
+     */
     public Model model;
+    /**
+     * Wezły
+     */
     public String node;
+    /**
+     * Instancja modelu.
+     */
     public ModelInstance instance;
+    /**
+     * Stan ruchu.
+     */
     public btDefaultMotionState motionState = null;
+    /**
+     * Skalowanie obiektu.
+     */
     protected float scaleRatio;
 
     private final static BoundingBox bounds = new BoundingBox();
+    /**
+     * Wektor (środek obiektu.)
+     */
     public final Vector3 center = new Vector3();
+    /**
+     * Rozmiary obiektu.
+     */
     public final Vector3 dimensions = new Vector3();
+    /**
+     * Średnica
+     */
     public float radius = 0;
+    /**
+     * Identyfikator obiektu.
+     */
     public int objectId;
-    private static int id = 0;
+    /**
+     * Unikalny identykator obiektu.
+     */
+    public static int id = 0;
 
+    /**
+     * Konstruktor nowej instancji obiektu gry.
+     *
+     * @param model             model
+     * @param instance          instancja
+     * @param node              węzły
+     * @param constructionInfo  dane i obiekcie
+     * @param scaleRatio        skala
+     * @param createMotionState stan ruchu
+     */
     public GameObject(Model model, ModelInstance instance, String node, btRigidBody.btRigidBodyConstructionInfo constructionInfo,
                        float scaleRatio, boolean createMotionState) {
         this.model = model;
@@ -53,39 +99,80 @@ public class GameObject implements Disposable{
 
     }
 
+    /**
+     * Ustawia dane o obiekcie.
+     *
+     * @param customObjectData nowe dane o obiekcie
+     */
     public void setUserData(CustomObjectData customObjectData) {
         body.userData = customObjectData;
     }
 
+    /**
+     * Pobiera dane o obiekcie
+     *
+     * @return the uset data
+     */
     public CustomObjectData getUsetData() {
         return (CustomObjectData) body.userData;
     }
 
+    /**
+     * Pobiera ciało obiektu.
+     *
+     * @return ciało obiektu
+     */
     public btRigidBody getBody() {
         return body;
     }
 
+    /**
+     * Pobiera model obiektu.
+     *
+     * @return model obiektu
+     */
     public Model getModel() {
         return model;
     }
 
+    /**
+     * Pobiera węzły obiektu.
+     *
+     * @return wezły
+     */
     public String getNode() {
         return node;
     }
 
+    /**
+     * Pobiera instancję obiektu.
+     *
+     * @return instancja
+     */
     public ModelInstance getInstance() {
         return instance;
     }
 
+    /**
+     * Pobiera identyfikator obiektu.
+     *
+     * @return identyfikator obiektu
+     */
     public int getObjectId() {
         return objectId;
     }
 
+    /**
+     * Pobiera transformację świata.
+     */
     public void getWorldTransform() {
         if (this.motionState != null)
             this.motionState.getWorldTransform(this.getInstance().transform);
     }
 
+    /**
+     * Niszczenie obiektu.
+     */
     public void destroy() {
         body.dispose();
         instance.model.dispose();
@@ -99,17 +186,52 @@ public class GameObject implements Disposable{
         instance.model.dispose();
     }
 
+    /**
+     * Konstruktor instacji ciałą obiektu.
+     */
     static class BodyConstructor implements Disposable {
+        /**
+         * Model
+         */
         public final Model model;
+        /**
+         * Węzły
+         */
         public final String node;
         private final float scaleRatio;
+        /**
+         * Kształ kolizji.
+         */
         public btCollisionShape shape;
+        /**
+         * Pozycja - wektor 0,0,0
+         */
         public Vector3 position = Vector3.Zero;
+        /**
+         * Stan ruchu
+         */
         public boolean motionStateCreate;
+        /**
+         * Instancja modelu
+         */
         public ModelInstance instance;
+        /**
+         * Informacje o twardym ciele obiektu.
+         */
         public final btRigidBody.btRigidBodyConstructionInfo constructionInfo;
         private static Vector3 localInertia = new Vector3();
 
+        /**
+         * Konstruktor klasy BodyConstructor
+         *
+         * @param model             model
+         * @param node              węzły
+         * @param shape             kształt
+         * @param pos               pozycja (przesuniecie)
+         * @param mass              masa obiektu
+         * @param scaleRatio        skala
+         * @param motionStateCreate stan ruchu
+         */
         public BodyConstructor(Model model, String node, btCollisionShape shape, Vector3 pos, float mass,
                                float scaleRatio, boolean motionStateCreate) {
             this.model = model;
@@ -141,6 +263,13 @@ public class GameObject implements Disposable{
             this.constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, null, this.shape, localInertia);
         }
 
+        /**
+         * Tworzenie obiektu na podstawie załadowanego modelu
+         *
+         * @param model    model
+         * @param optimize czy ma optymalizować model
+         * @return model
+         */
         public static btConvexHullShape createConvexHullShape(final Model model, boolean optimize) {
             final Mesh mesh = model.meshes.get(0);
             final btConvexHullShape shape = new btConvexHullShape(mesh.getVerticesBuffer(), mesh.getNumVertices(), mesh.getVertexSize());
@@ -154,6 +283,11 @@ public class GameObject implements Disposable{
         }
 
 
+        /**
+         * Zwraca nowy obiekt gry.
+         *
+         * @return obiekt gry
+         */
         public GameObject construct () {
             return new GameObject(model, instance, node, constructionInfo, scaleRatio, motionStateCreate);
         }

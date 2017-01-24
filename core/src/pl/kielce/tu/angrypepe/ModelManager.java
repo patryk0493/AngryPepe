@@ -12,40 +12,133 @@ import com.badlogic.gdx.utils.Disposable;
 import java.lang.String;
 import java.util.ArrayList;
 
+/**
+ * Klasa zarządzająca modelami.
+ * @author Patryk Eliasz, Karol Rębiś */
 public final class ModelManager implements Disposable{
 
+    /**
+     * Statyczny model gry - SPHERE.
+     */
     public static Model SPHERE;
+    /**
+     * TStatyczny model gry - BOX.
+     */
     public static Model BOX;
+    /**
+     * Statyczny model gry - RECTANGLE.
+     */
     public static Model RECTANGLE;
+    /**
+     * Statyczny model gry - GROUND.
+     */
     public static Model GROUND;
+    /**
+     * Statyczny model gry - CYLINDER.
+     */
     public static Model CYLINDER;
 
+    /**
+     * Nazwa modelu do załadowania - PEPE.
+     */
     protected static String PEPE = "pepe_box.g3dj";
+    /**
+     * Nazwa modelu do załadowania -  SKYDOME.
+     */
     protected static String SKYDOME = "skydome.g3dj";
+    /**
+     * Nazwa modelu do załadowania -  TEST.
+     */
     protected static String TEST = "123.g3dj";
+    /**
+     * Nazwa modelu do załadowania -  POLY_PEPE_1.
+     */
     protected static String POLY_PEPE_1 = "poly_pepe1.g3dj";
+    /**
+     * Nazwa modelu do załadowania -  POLY_PEPE_2.
+     */
     protected static String POLY_PEPE_2 = "poly_pepe2.g3dj";
+    /**
+     * Nazwa modelu do załadowania - SOWA_S.
+     */
     protected static String SOWA_S = "sowa_s.g3dj";
+    /**
+     * Nazwa modelu do załadowania - STREET_LAMP.
+     */
     protected static String STREET_LAMP = "Streetlamp.g3dj";
+    /**
+     * Nazwa modelu do załadowania - DREWNO.
+     */
     protected static String DREWNO = "drewno.g3dj";
+    /**
+     * Nazwa modelu do załadowania - OIL_BARREL.
+     */
     protected static String OIL_BARREL = "OilBarrel.g3dj";
+    /**
+     * Nazwa modelu do załadowania - WOODEN_BOX.
+     */
     protected static String WOODEN_BOX = "Wooden_box.g3dj";
+    /**
+     * Nazwa modelu do załadowania - PLASZCZYZNA.
+     */
     protected static String PLASZCZYZNA = "plaszczyzna.g3dj";
+    /**
+     * Nazwa modelu do załadowania - TREE.
+     */
     protected static String TREE = "toon-pine-tree.g3dj";
 
+    /**
+     * Nazwa cząsteczki do załadowania -  PARTICLE.
+     */
     public static String PARTICLE = "cloudpuff.pfx";
 
+    /**
+     * Statyczny model PEPE_MODEL.
+     */
     public static Model PEPE_MODEL;
+    /**
+     * Statyczny model SKYDOME_MODEL.
+     */
     public static Model SKYDOME_MODEL;
+    /**
+     * Statyczny model TEST_MODEL.
+     */
     public static Model TEST_MODEL;
+    /**
+     * Statyczny model POLY_PEPE_1_MODEL.
+     */
     public static Model POLY_PEPE_1_MODEL;
+    /**
+     * Statyczny model POLY_PEPE_2_MODEL.
+     */
     public static Model POLY_PEPE_2_MODEL;
+    /**
+     * Statyczny model SOWA_S_MODEL.
+     */
     public static Model SOWA_S_MODEL;
+    /**
+     * Statyczny model STREET_LAMP_MODEL.
+     */
     public static Model STREET_LAMP_MODEL;
+    /**
+     * Statyczny model DREWNO_MODEL.
+     */
     public static Model DREWNO_MODEL;
+    /**
+     * Statyczny model OIL_BARREL_MODEL.
+     */
     public static Model OIL_BARREL_MODEL;
+    /**
+     * Statyczny model WOODEN_BOX_MODEL.
+     */
     public static Model WOODEN_BOX_MODEL;
+    /**
+     * Statyczny model PLASZCZYZNA_MODEL.
+     */
     public static Model PLASZCZYZNA_MODEL;
+    /**
+     * Statyczny model TREE_MODEL.
+     */
     public static Model TREE_MODEL;
 
     private static AssetManager assets;
@@ -54,6 +147,9 @@ public final class ModelManager implements Disposable{
 
     private ModelManager() { }
 
+    /**
+     * Tworzenie obiektów gry przy pierwszy użyciu
+     */
     static {
         // CREATE SIMPLE MODELS
         modelArrayList.add(createBox(1f, 1f, 1f));
@@ -65,6 +161,9 @@ public final class ModelManager implements Disposable{
         loadCustomModels();
     }
 
+    /**
+     * Załadowanie modeli z plików, dodanie ich do list.
+     */
     public static void loadCustomModels () {
 
         assets = new AssetManager();
@@ -110,13 +209,29 @@ public final class ModelManager implements Disposable{
         modelArrayList.add(TREE_MODEL);
     }
 
-    private static Model createGround(float x, float y, float z) {
+    /**
+     * Tworzenie płaszczyzny gry.
+     *
+     * @param x długość
+     * @param y wysokość
+     * @param z głebokość
+     * @return model obiektu
+     */
+    public static Model createGround(float x, float y, float z) {
         GROUND = modelBuilder.createBox(x, y, z,
                 new Material(ColorAttribute.createDiffuse(Color.OLIVE)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         return GROUND;
     }
 
+    /**
+     * Tworzenie sześcianiu.
+     *
+     * @param x długość
+     * @param y wysokość
+     * @param z głebokość
+     * @return model obiektu
+     */
     public static Model createBox(float x, float y, float z) {
         BOX = modelBuilder.createBox(x, y, z,
                 new Material(ColorAttribute.createDiffuse(Color.FOREST)),
@@ -124,6 +239,14 @@ public final class ModelManager implements Disposable{
         return BOX;
     }
 
+    /**
+     * Create cylinder model.
+     *
+     * @param width  the width
+     * @param height the height
+     * @param lenght the lenght
+     * @return model obiektu
+     */
     public static Model createCylinder(float width, float height, float lenght) {
         CYLINDER = modelBuilder.createCylinder(width, height, lenght, 20,
                 new Material(ColorAttribute.createDiffuse(Color.SKY), ColorAttribute.createSpecular(Color.GRAY),
@@ -131,6 +254,12 @@ public final class ModelManager implements Disposable{
         return CYLINDER;
     }
 
+    /**
+     * Tworzenie kuli
+     *
+     * @param fi średnica
+     * @return model obiektu
+     */
     public static Model createSphere(float fi) {
         SPHERE = modelBuilder.createSphere(fi, fi, fi, 20, 20,
                 new Material(ColorAttribute.createDiffuse(Color.WHITE), ColorAttribute.createSpecular(Color.GRAY),
@@ -138,6 +267,14 @@ public final class ModelManager implements Disposable{
         return SPHERE;
     }
 
+    /**
+     * Tworzy prostopadłościan
+     *
+     * @param x długość
+     * @param y wysokość
+     * @param z głebokość
+     * @return model obiektu
+     */
     public static Model createRectangle(float x, float y, float z) {
         RECTANGLE = modelBuilder.createBox(x, y, z,
                 new Material(ColorAttribute.createDiffuse(Color.PURPLE)),

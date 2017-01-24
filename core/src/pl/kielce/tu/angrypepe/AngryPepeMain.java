@@ -7,15 +7,24 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.*;
 
+/**
+ * Główna klasa rozgrywki.
+ * @author Patryk Eliasz, Karol Rębiś */
 public class AngryPepeMain extends ApplicationAdapter {
 
 
-	public WorldManager worldManager;
+	private WorldManager worldManager;
 	private InputMultiplexer inputMultiplexer;
 	private MyInputProcessor inputProcessor;
 	private MyGestureHandler gestureHandler;
 
-	public float w, h;
+	/**
+	 * Szerokość widoku okna.
+	 */
+	public float w, /**
+	 * Wysokość widoku okna.
+	 */
+	h;
 
 	@Override
 	public void create () {
@@ -46,6 +55,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 	}
 
 
+	/**
+	 * Inicjowanie obsługi gestów użytkownika, myszy i klawiatury.
+	 */
 	public void initaliseInputProcessors() {
 
 		inputMultiplexer = new InputMultiplexer();
@@ -59,11 +71,12 @@ public class AngryPepeMain extends ApplicationAdapter {
 		inputMultiplexer.addProcessor(inputProcessor);
 	}
 
+	/**
+	 * Klasa odpowiedzialna za obsługę klawiatury oraz gestów myszy.
+	 */
 	class MyInputProcessor implements InputProcessor {
 
 		private float startX, startY;
-		int lastX;
-		int lastY;
 		@Override
 		public boolean scrolled(int amount) {
 			worldManager.getCam().changeZoom(amount);
@@ -129,6 +142,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 			return false;
 		}
 
+		/**
+		 * Zapamiętanie punktu z którego rozpocząto "ciągnięcie".
+		 */
 		@Override
 		public boolean touchDown(int screenX, int screenY, int pointer,
 								 int button) {
@@ -136,7 +152,7 @@ public class AngryPepeMain extends ApplicationAdapter {
 			Gdx.app.log("LOGGER", worldManager.getObject(screenX, screenY) +"");
 			Gdx.app.log("TOUCH DOWN: ", "x: " + screenX + " y:" + screenY);
 
-			if (worldManager.getObject(screenX, screenY).contains(13)) {
+			if (worldManager.getObject(screenX, screenY).contains(12)) {
 				worldManager.setPulling(true);
 				startX = screenX;
 				startY = screenY;
@@ -144,6 +160,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 			return false;
 		}
 
+		/**
+		 * Odczyt siły naciągu oraz przemieszczenie obiektu.
+		 */
 		@Override
 		public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
@@ -179,20 +198,28 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	}
 
+	/**
+	 * Obsługa gestów dla ekranu dotykowanego.
+	 */
 	class MyGestureHandler implements GestureDetector.GestureListener {
 
+		/**
+		 * Skala początkowa.
+		 */
 		public float initialScale = 1.0f;
 
-		private float startX, startY;
+		/**
+		 * Punkt początkowy "ciągniecia".
+		 */
+		public float startX, startY;
 
 		@Override
 		public boolean touchDown(float x, float y, int pointer, int button) {
 			Gdx.app.log("TOUCH DOWN: ", "x: " + x + " y:" + y);
 			worldManager.getCam().updateInitialScale();
-			/*
-			getObject((int) x, (int) y);
+			worldManager.getObject((int) x, (int) y);
 			startX = x;
-			startY = y;*/
+			startY = y;
 
 			return false;
 		}
@@ -251,7 +278,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 		}
 	}
 
-
+	/**
+	 * Zmiana rozmiarów okna.
+	 */
 	@Override
 	public void resize(int width, int height) {
 		w = width;
