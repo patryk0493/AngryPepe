@@ -2082,6 +2082,9 @@
   "nodes": [
     {
       "id": "Cube",
+      "scale": [
+         8.267522, 8.267522, 8.267522
+      ],
       "parts": [
         {
           "meshpartid": "Cube_part0",

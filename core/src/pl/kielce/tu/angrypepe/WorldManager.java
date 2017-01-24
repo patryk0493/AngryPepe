@@ -113,7 +113,7 @@ public class WorldManager {
     }
 
     /**
-     * Utworzenia obiektów gry, dodanie ich do świata oraz zapisanie ich ich w listach.
+     * Tworzenie obiektów gry, dodanie ich do świata oraz zapisanie ich w listach.
      */
     public void createGameObjects() {
 
@@ -272,7 +272,7 @@ public class WorldManager {
     }
 
     /**
-     * Utworzenie obiektu gry - .
+     * Utworzenie obiektu gry - z niestandardowymi ustawieniami ciała obiektu.
      */
     public void createGameObject() {
         GameObject sample = new GameObject.BodyConstructor(
@@ -317,7 +317,7 @@ public class WorldManager {
      *
      * @param screenX współrzędna X
      * @param screenY współrzędna Y
-     * @return lista obiektów które "przeszył" promień
+     * @return lista identyfikatorów obiektów, które "przeszył" promień
      */
     public ArrayList<Integer> getObject (int screenX, int screenY) {
         Ray ray = cam.getPickRay(screenX, screenY);
@@ -391,7 +391,6 @@ public class WorldManager {
                 e.printStackTrace();
                 return false;
             }
-
             gameObjectsList.remove(gameObject);
             objectInstances.remove(gameObject.instance);
         }
@@ -411,7 +410,6 @@ public class WorldManager {
      * Czyszczenie pamięci.
      */
     public void dispose() {
-
         world.dispose();
         collisionConfiguration.dispose();
         dispatcher.dispose();
@@ -494,12 +492,15 @@ public class WorldManager {
         @Override
         public void onContactStarted (btCollisionObject colObj0, btCollisionObject colObj1) {
 
+            // Pobranie danych o obiektach
             CustomObjectData customObjectData1 = (CustomObjectData) colObj0.userData;
             CustomObjectData customObjectData2  = (CustomObjectData) colObj1.userData;
 
+            // Pobranie obiektów gry
             GameObject go1 = getCollistionObject(customObjectData1.getId());
             GameObject go2 = getCollistionObject(customObjectData2.getId());
 
+            // gdy obiekt jest nieruchomy - należy zaaktualizowa
             if(!go1.body.isStaticObject())
                 go1.getUsetData().updateHp( calculateMomentum(go1, go2) );
             if(!go2.body.isStaticObject())
@@ -508,12 +509,17 @@ public class WorldManager {
             System.out.println(getMaxVelecity(go1.body.getLinearVelocity()) + " : " + getMaxVelecity(go2.body.getLinearVelocity()));
             System.out.println( customObjectData1.toString() + " : " + customObjectData2.toString() );
 
+            // Sprawdzenie czy obiekt może zostać zniszczony
             if ( go1.getUsetData().getHp() < 0f && go1.getUsetData().isDestructible()) {
+                //spowolnienie drugiego obiektu w zależności od jego prędkości liniowej
                 go2.body.setLinearVelocity(go2.body.getLinearVelocity().scl(go1.body.getInvMass()));
+                // wybuch
                 particleUtils.boomEffect(go1.body.getWorldTransform().getTranslation(new Vector3()),
                         calculateMomentum(go2, go1)/4);
+                // usunięcie ze świata gry
                 removeGameObject(go1);
 
+                // dźwiek zniszczenia
                 Music click = Gdx.audio.newMusic(Gdx.files.internal("Tiny Button Push-SoundBible.com-513260752.mp3"));
                 click.play();
 
@@ -527,11 +533,10 @@ public class WorldManager {
                 Music click = Gdx.audio.newMusic(Gdx.files.internal("Tiny Button Push-SoundBible.com-513260752.mp3"));
                 click.play();
             }
-
         }
 
         /**
-         * Obiczenie pędu między obiektami
+         * Obliczenie pędu między obiektami
          *
          * @param o1 obiekt 1
          * @param o2 obiekt 2

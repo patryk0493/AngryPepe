@@ -4,7 +4,15 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import pl.kielce.tu.angrypepe.AngryPepeMain;
 
+/**
+ * Klasa uruchamiająca desktopową wersję aplikacji.
+ */
 public class DesktopLauncher {
+	/**
+	 * The entry point of application.
+	 *
+	 * @param arg the input arguments
+	 */
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 
@@ -14,7 +22,7 @@ public class DesktopLauncher {
 		config.resizable=true;
 		config.vSyncEnabled = true;
 		config.foregroundFPS = 60;
-		config.samples = 4;
+		config.samples = 8;
 		new LwjglApplication(new AngryPepeMain(), config);
 	}
 }

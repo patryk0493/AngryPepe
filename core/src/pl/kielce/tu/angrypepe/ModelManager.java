@@ -240,11 +240,11 @@ public final class ModelManager implements Disposable{
     }
 
     /**
-     * Create cylinder model.
+     * Tworzy cylinder
      *
-     * @param width  the width
-     * @param height the height
-     * @param lenght the lenght
+     * @param width długość
+     * @param height wysokość
+     * @param lenght głebokość
      * @return model obiektu
      */
     public static Model createCylinder(float width, float height, float lenght) {
