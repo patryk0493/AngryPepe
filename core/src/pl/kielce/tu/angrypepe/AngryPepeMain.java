@@ -39,6 +39,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 	}
 
+	/**
+	 * Renderuje świat
+	 */
 	@Override
 	public void render() {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -47,7 +50,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 
 		worldManager.renderWorld();
 	}
-	
+
+	/**
+	 * Zwolnienie pamieci.
+	 */
 	@Override
 	public void dispose () {
 		worldManager.dispose();
@@ -77,6 +83,10 @@ public class AngryPepeMain extends ApplicationAdapter {
 	class MyInputProcessor implements InputProcessor {
 
 		private float startX, startY;
+
+		/**
+		 * Obsłużenie kółka myszy
+		 */
 		@Override
 		public boolean scrolled(int amount) {
 			worldManager.getCam().changeZoom(amount);
@@ -95,14 +105,21 @@ public class AngryPepeMain extends ApplicationAdapter {
 			return false;
 		}
 
+
 		@Override
 		public boolean keyUp(int keycode) {
 			return false;
 		}
 
+		/**
+		 * Osługa kliknięcia klawisza
+		 */
 		@Override
 		public boolean keyTyped(char character) {
 
+			/**
+			 * skala uderzenie
+			 */
 			final float power = 6;
 
 			if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
@@ -120,10 +137,6 @@ public class AngryPepeMain extends ApplicationAdapter {
 			}
 			if(Gdx.input.isKeyPressed(Input.Keys.I)) {
 				worldManager.getCam().setCurrentView(CameraManager.View.FRONT);
-			}
-
-			if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-				worldManager.removeGameObject(worldManager.getBoxGameObject());
 			}
 
 			if(Gdx.input.isKeyPressed(Input.Keys.R)) {
@@ -224,6 +237,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 			return false;
 		}
 
+		/**
+		 * Obsługa gestu powiększenia
+		 */
 		@Override
 		public boolean zoom(float initialDistance, float distance) {
 
@@ -246,6 +262,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 			return false;
 		}
 
+		/**
+		 * Obsługa gestu przeciągnięcia
+		 */
 		@Override
 		public boolean pan(float x, float y, float deltaX, float deltaY) {
 
@@ -262,6 +281,9 @@ public class AngryPepeMain extends ApplicationAdapter {
 			return false;
 		}
 
+		/**
+		 * Obsługa gestu uszczypnięcia
+		 */
 		@Override
 		public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2,
 							 Vector2 pointer1, Vector2 pointer2) {
@@ -288,10 +310,16 @@ public class AngryPepeMain extends ApplicationAdapter {
 		worldManager.getCam().updateViewport(width, height);
 	}
 
+	/**
+	 * Obsługa cyklu aktywności aplikacji dla systemu Android - pauzy
+	 */
 	@Override
 	public void pause() {
 	}
 
+	/**
+	 * Obsługa cyklu aktywności aplikacji dla systemu Android - wznowienia
+	 */
 	@Override
 	public void resume() {
 	}
